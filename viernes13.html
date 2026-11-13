@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Especial Viernes 13 🖤✨</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0b0f19 0%, #1a102f 50%, #080c16 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 14px 40px;
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+
+    .back-btn {
+      align-self: flex-start;
+      background: rgba(255, 182, 193, 0.15);
+      border: 1px solid rgba(255, 182, 193, 0.4);
+      color: #ffb6c1;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-decoration: none;
+      margin-bottom: 14px;
+    }
+
+    .header-banner {
+      width: 100%;
+      max-width: 350px;
+      background: linear-gradient(to top, rgba(11,15,25,0.95) 20%, rgba(74,20,140,0.4) 80%), url('https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=500&auto=format&fit=crop') center/cover;
+      border-radius: 20px;
+      padding: 24px 16px;
+      text-align: center;
+      border: 1.5px solid rgba(135, 206, 250, 0.4);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      margin-bottom: 20px;
+    }
+
+    .header-banner h1 {
+      font-size: 1.45rem;
+      color: #ffb6c1;
+      margin-bottom: 8px;
+      font-family: Georgia, serif;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    }
+
+    .header-banner p {
+      font-size: 0.85rem;
+      color: #e0f7fa;
+      line-height: 1.4;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+    }
+
+    /* CONTENEDOR DE CARTAS MISTERIOSAS */
+    .cards-container {
+      width: 100%;
+      max-width: 350px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .mystery-card {
+      background: rgba(16, 25, 53, 0.85);
+      backdrop-filter: blur(10px);
+      border: 1.5px solid rgba(255, 182, 193, 0.3);
+      border-radius: 16px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
+
+    .mystery-card.revealed {
+      background: rgba(26, 37, 76, 0.95);
+      border-color: #87ceeb;
+      transform: scale(1.02);
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #ffd166;
+      margin-bottom: 6px;
+    }
+
+    .card-text {
+      font-size: 0.82rem;
+      color: #e0f7fa;
+      line-height: 1.45;
+      font-family: Georgia, serif;
+      display: none;
+    }
+
+    .mystery-card.revealed .card-text {
+      display: block;
+    }
+
+    .mystery-card.revealed .card-hint {
+      display: none;
+    }
+
+    .card-hint {
+      font-size: 0.78rem;
+      color: #ffb6c1;
+      font-style: italic;
+    }
+
+    /* MENSAJE FINAL SECRETO */
+    .final-surprise {
+      display: none;
+      width: 100%;
+      max-width: 350px;
+      background: linear-gradient(135deg, #1a254c 0%, #2b093f 100%);
+      border: 2.5px solid #ffb6c1;
+      border-radius: 20px;
+      padding: 20px 16px;
+      text-align: center;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+      animation: fadeInModal 0.5s ease;
+    }
+
+    @keyframes fadeInModal {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .final-surprise h3 {
+      color: #ffb6c1;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      font-family: Georgia, serif;
+    }
+
+    .final-surprise p {
+      font-size: 0.86rem;
+      color: #e0f7fa;
+      line-height: 1.5;
+      margin-bottom: 15px;
+      font-family: Georgia, serif;
+    }
+
+    .btn-action {
+      background: linear-gradient(135deg, #ff758c 0%, #4facfe 100%);
+      color: white;
+      border: none;
+      padding: 11px 20px;
+      border-radius: 14px;
+      font-weight: bold;
+      font-size: 0.88rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+    }
+  </style>
+</head>
+<body>
+
+  <a href="index.html" class="back-btn">← Volver al Rincón</a>
+
+  <div class="header-banner">
+    <h1>Especial Viernes 13 🖤✨</h1>
+    <p>Dicen que hoy es de mala suerte... pero la mía cambió el día en que te conocí. 🥺</p>
+  </div>
+
+  <div class="cards-container" id="cardsContainer">
+    <!-- Carta 1 -->
+    <div class="mystery-card" onclick="revealCard(this, 1)">
+      <div class="card-title">🔮 Amuleto I: Las supersticiones</div>
+      <div class="card-hint">Toca para romper el mito 👆</div>
+      <div class="card-text">Dicen que cruzarse con un gato negro da mala suerte... pero la única mala suerte sería no haberme cruzado contigo en la discoteca. 🤭</div>
+    </div>
+
+    <!-- Carta 2 -->
+    <div class="mystery-card" onclick="revealCard(this, 2)">
+      <div class="card-title">🔮 Amuleto II: La coincidencia</div>
+      <div class="card-hint">Toca para descubrir el secreto 👆</div>
+      <div class="card-text">No creo en los días de mala racha, porque cada vez que coincidimos (incluso en el gimnasio o de casualidad), mi semana se vuelve increíble. ✨</div>
+    </div>
+
+    <!-- Carta 3 -->
+    <div class="mystery-card" onclick="revealCard(this, 3)">
+      <div class="card-title">🔮 Amuleto III: El encanto</div>
+      <div class="card-hint">Toca para revelar el último misterio 👆</div>
+      <div class="card-text">Tienes una vibra tan bonita que ninguna superstición del mundo podría arruinar un día en el que tú sonríes. 💙</div>
+    </div>
+  </div>
+
+  <!-- SORPRESA FINAL -->
+  <div class="final-surprise" id="finalSurprise">
+    <h3>Hechizo completado 🪄✨</h3>
+    <p>
+      Has roto todas las reglas del viernes 13. Ahora que los amuletos se han abierto, tengo una pregunta oficial para ti: <br><br>
+      <b>¿Quieres que este fin de semana salgamos a romper cualquier mala racha juntos? 🥺💙</b>
+    </p>
+    <button class="btn-action" onclick="celebrateLove()">¡Acepto con una sonrisa! 🙈</button>
+  </div>
+
+  <script>
+    let revealedCount = 0;
+
+    function revealCard(cardElement, id) {
+      if (cardElement.classList.contains('revealed')) return;
+
+      cardElement.classList.add('revealed');
+      revealedCount++;
+      if (navigator.vibrate) navigator.vibrate(30);
+
+      // Si descubre las 3 cartas, aparece la sorpresa final
+      if (revealedCount === 3) {
+        setTimeout(() => {
+          document.getElementById('finalSurprise').style.display = 'block';
+          if (typeof confetti === 'function') {
+            confetti({
+              particleCount: 90,
+              spread: 75,
+              origin: { y: 0.7 },
+              colors: ['#ffb6c1', '#87ceeb', '#ffffff', '#ffd166']
+            });
+          }
+        }, 400);
+      }
+    }
+
+    function celebrateLove() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 140,
+          spread: 100,
+          origin: { y: 0.5 },
+          colors: ['#ff758c', '#4facfe', '#ffd166', '#ffffff']
+        });
+      }
+      alert("¡Yei! 🥳 Ahora ve a decírselo en persona o mándale captura de esto. ¡Mucho éxito!");
+    }
+  </script>
+</body>
+</html>
