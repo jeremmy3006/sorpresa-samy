@@ -184,12 +184,38 @@
       z-index: 100;
     }
 
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
     .brand-logo {
       font-size: 1rem;
       font-weight: 900;
       color: #ffb6c1;
       letter-spacing: 0.5px;
       text-transform: uppercase;
+    }
+
+    /* Botón de control de música discretamente integrado */
+    .btn-music-toggle {
+      background: rgba(135, 206, 250, 0.15);
+      border: 1px solid rgba(135, 206, 250, 0.4);
+      color: #87ceeb;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+
+    .btn-music-toggle:hover {
+      background: rgba(135, 206, 250, 0.3);
     }
 
     .user-profile-badge {
@@ -444,6 +470,9 @@
 </head>
 <body>
 
+  <!-- AUDIO DE FONDO OCULTO -->
+  <audio id="bgMusic" src="musica.mp3" loop></audio>
+
   <!-- PANTALLA 1: SELECCIÓN DE PERFIL -->
   <div id="profile-gate">
     <div class="gate-logo">El Rincón Especial de Samy 🫧💙</div>
@@ -471,7 +500,10 @@
   <div id="main-app">
     <div class="netflix-nav">
       <div class="brand-logo">El Rincón Especial de Samy 🫧💙</div>
-      <div class="user-profile-badge">S</div>
+      <div class="nav-right">
+        <button class="btn-music-toggle" id="musicToggleBtn" onclick="toggleMusic()">🔊 Música</button>
+        <div class="user-profile-badge">S</div>
+      </div>
     </div>
 
     <!-- BANNER PRINCIPAL ADAPTABLE -->
@@ -554,6 +586,10 @@
     const pinInput = document.getElementById('pinInput');
     const pinError = document.getElementById('pinError');
     const mainApp = document.getElementById('main-app');
+    const bgMusic = document.getElementById('bgMusic');
+    const musicToggleBtn = document.getElementById('musicToggleBtn');
+
+    let isMusicPlaying = false;
 
     function openPinModal() {
       pinModal.style.display = 'flex';
@@ -576,10 +612,32 @@
         setTimeout(() => {
           profileGate.style.display = 'none';
           mainApp.style.display = 'block';
+          
+          // Reproducir música al ingresar correctamente
+          bgMusic.volume = 0.5;
+          bgMusic.play().then(() => {
+            isMusicPlaying = true;
+            musicToggleBtn.textContent = "🔊 Música";
+          }).catch(err => {
+            console.log("Reproducción automática bloqueada por el navegador, usa el botón.", err);
+            musicToggleBtn.textContent = "🔇 Activar Música";
+          });
         }, 500);
       } else {
         pinError.textContent = "Contraseña incorrecta. Inténtalo de nuevo.";
         pinInput.value = "";
+      }
+    }
+
+    function toggleMusic() {
+      if (isMusicPlaying) {
+        bgMusic.pause();
+        isMusicPlaying = false;
+        musicToggleBtn.textContent = "🔇 Silenciado";
+      } else {
+        bgMusic.play();
+        isMusicPlaying = true;
+        musicToggleBtn.textContent = "🔊 Música";
       }
     }
 
