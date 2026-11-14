@@ -28,10 +28,18 @@
       perspective: 1200px;
     }
 
-    .back-btn {
+    .top-nav-bar {
       position: absolute;
       top: 16px;
       left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 50;
+    }
+
+    .back-btn {
       background: rgba(135, 206, 250, 0.12);
       border: 1px solid rgba(135, 206, 250, 0.3);
       color: #87ceeb;
@@ -40,7 +48,22 @@
       font-size: 0.78rem;
       font-weight: 700;
       text-decoration: none;
-      z-index: 50;
+    }
+
+    /* Botón discreto para la música */
+    .btn-music-toggle {
+      background: rgba(135, 206, 250, 0.15);
+      border: 1px solid rgba(135, 206, 250, 0.4);
+      color: #87ceeb;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
     }
 
     .header-box {
@@ -372,7 +395,13 @@
 </head>
 <body>
 
-  <a href="index.html" class="back-btn">← Volver al Rincón</a>
+  <!-- AUDIO DE FONDO PARA EL ESPECIAL -->
+  <audio id="specialAudio" src="musica1.mp3" loop></audio>
+
+  <div class="top-nav-bar">
+    <a href="index.html" class="back-btn">← Volver al Rincón</a>
+    <button class="btn-music-toggle" id="musicToggleBtn" onclick="toggleMusic()">🔊 Música</button>
+  </div>
 
   <div class="header-box">
     <h1>Crown.exe • 14.11 👑</h1>
@@ -399,7 +428,7 @@
     <button class="btn-enter-samy" onclick="showFinalCard()">Abrir Carta Secreta 💌</button>
   </div>
 
-  <!-- MODAL DE CARTA Y CORONA FINAL (TÍMIDO Y CON INDIRECTAS) -->
+  <!-- MODAL DE CARTA Y CORONA FINAL -->
   <div class="modal-overlay" id="nightModal">
     <div class="modal-paper">
       <div class="wax-seal">👑</div>
@@ -439,6 +468,32 @@
     const introOverlay = document.getElementById('introOverlay');
     const nightModal = document.getElementById('nightModal');
     const headerBox = document.querySelector('.header-box');
+    const specialAudio = document.getElementById('specialAudio');
+    const musicToggleBtn = document.getElementById('musicToggleBtn');
+    let isMusicPlaying = false;
+
+    // Intentar reproducir música al primer clic o interacción en la página
+    window.addEventListener('click', () => {
+      if (!isMusicPlaying && specialAudio.paused) {
+        specialAudio.volume = 0.5;
+        specialAudio.play().then(() => {
+          isMusicPlaying = true;
+          musicToggleBtn.textContent = "🔊 Música";
+        }).catch(e => console.log("Audio interactivo pendiente", e));
+      }
+    }, { once: true });
+
+    function toggleMusic() {
+      if (isMusicPlaying) {
+        specialAudio.pause();
+        isMusicPlaying = false;
+        musicToggleBtn.textContent = "🔇 Silenciado";
+      } else {
+        specialAudio.play();
+        isMusicPlaying = true;
+        musicToggleBtn.textContent = "🔊 Música";
+      }
+    }
 
     function render3DCarousel() {
       container.innerHTML = '';
