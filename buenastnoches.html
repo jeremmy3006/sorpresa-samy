@@ -1,1 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Buenas Noches, Samy 🌙💤</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
 
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 20%, #0d1324 0%, #05070d 70%, #020306 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 20px 16px 40px;
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+
+    .back-btn {
+      align-self: flex-start;
+      background: rgba(135, 206, 250, 0.12);
+      border: 1px solid rgba(135, 206, 250, 0.3);
+      color: #87ceeb;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-decoration: none;
+      margin-bottom: 15px;
+    }
+
+    /* CONTENEDOR PRINCIPAL ESTILO TARJETA NOCTURNA */
+    .night-card {
+      width: 100%;
+      max-width: 350px;
+      background: rgba(16, 25, 53, 0.88);
+      backdrop-filter: blur(14px);
+      border: 1.5px solid rgba(255, 182, 193, 0.35);
+      border-radius: 24px;
+      padding: 26px 20px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      text-align: center;
+      position: relative;
+    }
+
+    .moon-icon {
+      font-size: 3.2rem;
+      margin-bottom: 8px;
+      filter: drop-shadow(0 0 15px rgba(255, 209, 102, 0.6));
+      animation: floatMoon 3.5s infinite ease-in-out alternate;
+    }
+
+    @keyframes floatMoon {
+      from { transform: translateY(0); }
+      to { transform: translateY(-8px); }
+    }
+
+    .night-card h1 {
+      font-size: 1.4rem;
+      color: #ffb6c1;
+      margin-bottom: 6px;
+      font-family: Georgia, serif;
+    }
+
+    .night-card p {
+      font-size: 0.84rem;
+      color: #e0f7fa;
+      line-height: 1.45;
+      margin-bottom: 18px;
+    }
+
+    /* PENSAMIENTO NOCTURNO INTERACTIVO */
+    .thought-box {
+      background: rgba(255, 182, 193, 0.07);
+      border: 1px dashed rgba(255, 182, 193, 0.35);
+      border-radius: 16px;
+      padding: 16px;
+      font-size: 0.9rem;
+      color: #ffb6c1;
+      font-family: Georgia, serif;
+      min-height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.5;
+      margin-bottom: 18px;
+      font-style: italic;
+      transition: opacity 0.3s ease;
+    }
+
+    .btn-night {
+      width: 100%;
+      background: linear-gradient(135deg, #87ceeb 0%, #4facfe 100%);
+      color: #0d1324;
+      border: none;
+      padding: 12px;
+      border-radius: 16px;
+      font-weight: 800;
+      font-size: 0.88rem;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(79, 172, 254, 0.35);
+      transition: transform 0.15s ease;
+      margin-bottom: 12px;
+    }
+
+    .btn-night:active {
+      transform: scale(0.96);
+    }
+
+    /* CIELO INTERACTIVO PARA DESCUBRIR ESTRELLAS ANTES DE DORMIR */
+    .mini-sky {
+      width: 100%;
+      height: 140px;
+      background: radial-gradient(circle at 50% 30%, #162247 0%, #05070d 100%);
+      border-radius: 14px;
+      border: 1px solid rgba(135, 206, 250, 0.3);
+      position: relative;
+      overflow: hidden;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .sky-star {
+      position: absolute;
+      font-size: 1.1rem;
+      cursor: pointer;
+      animation: twinkle 2s infinite alternate ease-in-out;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes twinkle {
+      0% { opacity: 0.5; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1.2); }
+    }
+
+    .sky-hint {
+      font-size: 0.72rem;
+      color: #87ceeb;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    /* MODAL FINAL DE BUENAS NOCHES (CARTA EN PERSONA) */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 3, 6, 0.94);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 200;
+    }
+
+    .modal-paper {
+      background: linear-gradient(180deg, #16203b 0%, #0d1324 100%);
+      color: #ffffff;
+      width: 100%;
+      max-width: 335px;
+      border-radius: 22px;
+      padding: 26px 18px;
+      border: 2.5px solid #ffb6c1;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      position: relative;
+    }
+
+    .wax-seal {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #ff758c 0%, #c51162 100%);
+      border: 2px solid #ffd166;
+      margin: -48px auto 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: Georgia, serif;
+      font-size: 1.2rem; font-weight: bold; color: #ffd166;
+    }
+
+    .modal-paper h3 {
+      color: #ffb6c1;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      font-family: Georgia, serif;
+    }
+
+    .modal-paper p {
+      font-size: 0.85rem;
+      line-height: 1.55;
+      color: #e0f7fa;
+      margin-bottom: 18px;
+      font-family: Georgia, serif;
+    }
+
+    .btn-close-modal {
+      background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 14px;
+      font-weight: bold;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <a href="index.html" class="back-btn">← Volver al Rincón</a>
+
+  <div class="night-card">
+    <div class="moon-icon">🌙✨</div>
+    <h1>Buenas Noches, Samy</h1>
+    <p>Un espacio tranquilo para leer despacito antes de cerrar los ojitos 💙</p>
+
+    <div class="thought-box" id="thoughtBox">
+      "Toca el botón de abajo para ver un pensamiento suave de buenas noches..." 💤
+    </div>
+
+    <button class="btn-night" id="btnNextThought">
+      Siguiente pensamiento nocturno 🌌
+    </button>
+
+    <div style="font-size: 0.78rem; color: #87ceeb; font-weight: 700; margin-top: 10px;">Constelación de calma:</div>
+    <div class="mini-sky" id="miniSky"></div>
+    <div class="sky-hint" id="skyHint">Toca las 3 estrellas ocultas en el cielo ✨ (0/3)</div>
+  </div>
+
+  <!-- MODAL FINAL DE BUENAS NOCHES -->
+  <div class="modal-overlay" id="nightModal">
+    <div class="modal-paper">
+      <div class="wax-seal">S</div>
+      <h3>Que descanses bonito, Samy 😴💙</h3>
+      <p>
+        Si estás leyendo esto en persona o antes de dormir, solo quería decirte que tienes una forma muy bonita de hacer que cualquier día termine con una sonrisa en la mente.<br><br>
+        Espero que sueñes con cosas hermosas, que descanses profundamente y que mañana sea un día increíble para ti. Buenas noches, Samy. 🥺✨
+      </p>
+      <button class="btn-close-modal" id="btnCloseModal">Cerrar los ojitos en paz 🌙</button>
+    </div>
+  </div>
+
+  <script>
+    // Pensamientos tiernos, sutiles y muy respetuosos (sin mencionar historia pasada)
+    const thoughts = [
+      "🌙 Pase lo que pase hoy, recuerda que hiciste un trabajo maravilloso. Descansa.",
+      "✨ Tienes una vibra tan bonita que hasta las estrellas brillan con más calma.",
+      "💙 Si mañana hay cosas por hacer, hoy solo permítete desconectar y estar en paz.",
+      "💤 Eres de esas personas que logran que los pensamientos antes de dormir sean muy gratos.",
+      "🌙 Respira hondo, suelta el cansancio del día y sonríe un poquito antes de apagar la luz.",
+      "⭐ Y por si nadie te lo recordó hoy: tu presencia hace que todo se sienta más bonito. 🥺"
+    ];
+
+    let currentIdx = 0;
+    const thoughtBox = document.getElementById('thoughtBox');
+    const btnNextThought = document.getElementById('btnNextThought');
+    const nightModal = document.getElementById('nightModal');
+    const btnCloseModal = document.getElementById('btnCloseModal');
+    const miniSky = document.getElementById('miniSky');
+    const skyHint = document.getElementById('skyHint');
+
+    let starsFound = 0;
+    const totalStarsToFind = 3;
+
+    // Generador de sonido sutil
+    let audioCtx = null;
+    function playSoftNote() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(580, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+      } catch (e) {}
+    }
+
+    btnNextThought.addEventListener('click', () => {
+      playSoftNote();
+      if (navigator.vibrate) navigator.vibrate(20);
+
+      thoughtBox.style.opacity = '0';
+      setTimeout(() => {
+        thoughtBox.textContent = thoughts[currentIdx];
+        thoughtBox.style.opacity = '1';
+        currentIdx++;
+
+        if (currentIdx === thoughts.length) {
+          btnNextThought.textContent = "Ver cartita secreta de buenas noches 💌";
+        } else if (currentIdx > thoughts.length) {
+          nightModal.style.display = 'flex';
+          if (typeof confetti === 'function') {
+            confetti({
+              particleCount: 80,
+              spread: 70,
+              origin: { y: 0.6 },
+              colors: ['#87ceeb', '#ffb6c1', '#ffffff', '#ffd166']
+            });
+          }
+        }
+      }, 200);
+    });
+
+    // Crear el mini cielo nocturno interactivo
+    function createMiniSky() {
+      miniSky.innerHTML = '';
+      starsFound = 0;
+      skyHint.textContent = `Toca las 3 estrellas ocultas en el cielo ✨ (${starsFound}/${totalStarsToFind})`;
+
+      const starPositions = [
+        { x: 25, y: 35 },
+        { x: 70, y: 30 },
+        { x: 50, y: 70 }
+      ];
+
+      starPositions.forEach((pos) => {
+        const star = document.createElement('div');
+        star.className = 'sky-star';
+        star.style.left = pos.x + '%';
+        star.style.top = pos.y + '%';
+        star.textContent = '⭐';
+
+        star.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (star.classList.contains('collected')) return;
+
+          star.classList.add('collected');
+          star.textContent = '✨';
+          star.style.animation = 'none';
+          starsFound++;
+          playSoftNote();
+          if (navigator.vibrate) navigator.vibrate(25);
+
+          skyHint.textContent = `Toca las 3 estrellas ocultas en el cielo ✨ (${starsFound}/${totalStarsToFind})`;
+
+          if (starsFound === totalStarsToFind) {
+            skyHint.textContent = "🌌 ¡Constelación completa! Desbloqueando mensaje...";
+            setTimeout(() => {
+              nightModal.style.display = 'flex';
+              if (typeof confetti === 'function') {
+                confetti({
+                  particleCount: 90,
+                  spread: 80,
+                  origin: { y: 0.5 },
+                  colors: ['#ffb6c1', '#87ceeb', '#ffd166', '#ffffff']
+                });
+              }
+            }, 500);
+          }
+        });
+
+        miniSky.appendChild(star);
+      });
+    }
+
+    createMiniSky();
+
+    btnCloseModal.addEventListener('click', () => {
+      nightModal.style.display = 'none';
+    });
+  </script>
+</body>
+</html>
