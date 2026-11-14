@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Buenas Noches, Samy 🌙💤</title>
+  <title>Buenas Noches, Samy 🌙✨</title>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
     * {
@@ -40,7 +40,6 @@
       margin-bottom: 15px;
     }
 
-    /* CONTENEDOR PRINCIPAL ESTILO TARJETA NOCTURNA */
     .night-card {
       width: 100%;
       max-width: 350px;
@@ -48,106 +47,121 @@
       backdrop-filter: blur(14px);
       border: 1.5px solid rgba(255, 182, 193, 0.35);
       border-radius: 24px;
-      padding: 26px 20px;
+      padding: 24px 18px;
       box-shadow: 0 20px 50px rgba(0,0,0,0.8);
       text-align: center;
       position: relative;
     }
 
-    .moon-icon {
-      font-size: 3.2rem;
-      margin-bottom: 8px;
-      filter: drop-shadow(0 0 15px rgba(255, 209, 102, 0.6));
-      animation: floatMoon 3.5s infinite ease-in-out alternate;
+    .firefly-icon {
+      font-size: 2.8rem;
+      margin-bottom: 6px;
+      animation: floatFirefly 3s infinite ease-in-out alternate;
     }
 
-    @keyframes floatMoon {
-      from { transform: translateY(0); }
-      to { transform: translateY(-8px); }
+    @keyframes floatFirefly {
+      0% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 8px #ffd166); }
+      100% { transform: translateY(-8px) scale(1.1); filter: drop-shadow(0 0 18px #ffb6c1); }
     }
 
     .night-card h1 {
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       color: #ffb6c1;
       margin-bottom: 6px;
       font-family: Georgia, serif;
     }
 
     .night-card p {
-      font-size: 0.84rem;
+      font-size: 0.82rem;
       color: #e0f7fa;
-      line-height: 1.45;
-      margin-bottom: 18px;
+      line-height: 1.4;
+      margin-bottom: 16px;
     }
 
-    /* PENSAMIENTO NOCTURNO INTERACTIVO */
+    /* CAJA DE PENSAMIENTOS DE LA LUCIÉRNAGA */
     .thought-box {
       background: rgba(255, 182, 193, 0.07);
       border: 1px dashed rgba(255, 182, 193, 0.35);
       border-radius: 16px;
-      padding: 16px;
-      font-size: 0.9rem;
+      padding: 15px;
+      font-size: 0.88rem;
       color: #ffb6c1;
       font-family: Georgia, serif;
-      min-height: 90px;
+      min-height: 85px;
       display: flex;
       align-items: center;
       justify-content: center;
-      line-height: 1.5;
-      margin-bottom: 18px;
+      line-height: 1.45;
+      margin-bottom: 16px;
       font-style: italic;
       transition: opacity 0.3s ease;
     }
 
     .btn-night {
       width: 100%;
-      background: linear-gradient(135deg, #87ceeb 0%, #4facfe 100%);
+      background: linear-gradient(135deg, #ffd166 0%, #ff758c 100%);
       color: #0d1324;
       border: none;
-      padding: 12px;
+      padding: 11px;
       border-radius: 16px;
       font-weight: 800;
-      font-size: 0.88rem;
+      font-size: 0.86rem;
       cursor: pointer;
-      box-shadow: 0 6px 20px rgba(79, 172, 254, 0.35);
+      box-shadow: 0 6px 20px rgba(255, 209, 102, 0.3);
       transition: transform 0.15s ease;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
     .btn-night:active {
       transform: scale(0.96);
     }
 
-    /* CIELO INTERACTIVO PARA DESCUBRIR ESTRELLAS ANTES DE DORMIR */
-    .mini-sky {
+    /* MINIJUEGO: EL FRASCO DE LUCIÉRNAGAS NOCTURNAS */
+    .jar-container {
       width: 100%;
-      height: 140px;
-      background: radial-gradient(circle at 50% 30%, #162247 0%, #05070d 100%);
-      border-radius: 14px;
-      border: 1px solid rgba(135, 206, 250, 0.3);
+      height: 150px;
+      background: radial-gradient(circle at 50% 40%, #1a2850 0%, #080c16 100%);
+      border-radius: 16px;
+      border: 1.5px solid rgba(135, 206, 250, 0.4);
       position: relative;
       overflow: hidden;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-
-    .sky-star {
-      position: absolute;
-      font-size: 1.1rem;
-      cursor: pointer;
-      animation: twinkle 2s infinite alternate ease-in-out;
-      transform: translate(-50%, -50%);
-    }
-
-    @keyframes twinkle {
-      0% { opacity: 0.5; transform: scale(0.8); }
-      100% { opacity: 1; transform: scale(1.2); }
-    }
-
-    .sky-hint {
-      font-size: 0.72rem;
-      color: #87ceeb;
       margin-top: 6px;
+      cursor: pointer;
+    }
+
+    .floating-light {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background: radial-gradient(circle, #ffffff 0%, #ffd166 60%, transparent 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 12px #ffd166;
+      cursor: pointer;
+      animation: flyAround 4s infinite alternate ease-in-out;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+    }
+
+    @keyframes flyAround {
+      0% { transform: translate(0, 0) scale(0.9); }
+      50% { transform: translate(40px, -25px) scale(1.1); }
+      100% { transform: translate(-30px, 30px) scale(1); }
+    }
+
+    .floating-light.caught {
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: none;
+      color: #87ceeb;
+      pointer-events: none;
+      animation: none;
+    }
+
+    .jar-hint {
+      font-size: 0.76rem;
+      color: #87ceeb;
+      margin-top: 8px;
       font-weight: 600;
     }
 
@@ -220,21 +234,21 @@
   <a href="index.html" class="back-btn">← Volver al Rincón</a>
 
   <div class="night-card">
-    <div class="moon-icon">🌙✨</div>
+    <div class="firefly-icon">🪲✨</div>
     <h1>Buenas Noches, Samy</h1>
     <p>Un espacio tranquilo para leer despacito antes de cerrar los ojitos 💙</p>
 
     <div class="thought-box" id="thoughtBox">
-      "Toca el botón de abajo para ver un pensamiento suave de buenas noches..." 💤
+      "Toca el botón de abajo para seguir el rastro de la luciérnaga..." 💤
     </div>
 
     <button class="btn-night" id="btnNextThought">
-      Siguiente pensamiento nocturno 🌌
+      Siguiente destello nocturno 🌌
     </button>
 
-    <div style="font-size: 0.78rem; color: #87ceeb; font-weight: 700; margin-top: 10px;">Constelación de calma:</div>
-    <div class="mini-sky" id="miniSky"></div>
-    <div class="sky-hint" id="skyHint">Toca las 3 estrellas ocultas en el cielo ✨ (0/3)</div>
+    <div style="font-size: 0.78rem; color: #ffd166; font-weight: 700; margin-top: 6px;">Atrapa 3 luceros de calma:</div>
+    <div class="jar-container" id="jarContainer"></div>
+    <div class="jar-hint" id="jarHint">Luceros atrapados: 0 / 3 ✨</div>
   </div>
 
   <!-- MODAL FINAL DE BUENAS NOCHES -->
@@ -251,10 +265,10 @@
   </div>
 
   <script>
-    // Pensamientos tiernos, sutiles y muy respetuosos (sin mencionar historia pasada)
+    // Pensamientos nocturnos súper tiernos y sutiles (sin repetir historia pasada)
     const thoughts = [
       "🌙 Pase lo que pase hoy, recuerda que hiciste un trabajo maravilloso. Descansa.",
-      "✨ Tienes una vibra tan bonita que hasta las estrellas brillan con más calma.",
+      "✨ Tienes una vibra tan bonita que hasta la noche se siente más cálida y tranquila.",
       "💙 Si mañana hay cosas por hacer, hoy solo permítete desconectar y estar en paz.",
       "💤 Eres de esas personas que logran que los pensamientos antes de dormir sean muy gratos.",
       "🌙 Respira hondo, suelta el cansancio del día y sonríe un poquito antes de apagar la luz.",
@@ -266,13 +280,12 @@
     const btnNextThought = document.getElementById('btnNextThought');
     const nightModal = document.getElementById('nightModal');
     const btnCloseModal = document.getElementById('btnCloseModal');
-    const miniSky = document.getElementById('miniSky');
-    const skyHint = document.getElementById('skyHint');
+    const jarContainer = document.getElementById('jarContainer');
+    const jarHint = document.getElementById('jarHint');
 
-    let starsFound = 0;
-    const totalStarsToFind = 3;
+    let lightsCaught = 0;
+    const totalLights = 3;
 
-    // Generador de sonido sutil
     let audioCtx = null;
     function playSoftNote() {
       try {
@@ -281,9 +294,9 @@
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(320, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(580, audioCtx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(350, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
@@ -318,40 +331,39 @@
       }, 200);
     });
 
-    // Crear el mini cielo nocturno interactivo
-    function createMiniSky() {
-      miniSky.innerHTML = '';
-      starsFound = 0;
-      skyHint.textContent = `Toca las 3 estrellas ocultas en el cielo ✨ (${starsFound}/${totalStarsToFind})`;
+    // Generar el minijuego de las luciérnagas flotantes
+    function createJarGame() {
+      jarContainer.innerHTML = '';
+      lightsCaught = 0;
+      jarHint.textContent = `Luceros atrapados: ${lightsCaught} / ${totalLights} ✨`;
 
-      const starPositions = [
-        { x: 25, y: 35 },
-        { x: 70, y: 30 },
+      const coords = [
+        { x: 20, y: 30 },
+        { x: 75, y: 40 },
         { x: 50, y: 70 }
       ];
 
-      starPositions.forEach((pos) => {
-        const star = document.createElement('div');
-        star.className = 'sky-star';
-        star.style.left = pos.x + '%';
-        star.style.top = pos.y + '%';
-        star.textContent = '⭐';
+      coords.forEach((pos) => {
+        const light = document.createElement('div');
+        light.className = 'floating-light';
+        light.style.left = pos.x + '%';
+        light.style.top = pos.y + '%';
+        light.textContent = '✨';
 
-        star.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (star.classList.contains('collected')) return;
+        function catchLight(e) {
+          if (e) e.cancelable && e.preventDefault();
+          if (light.classList.contains('caught')) return;
 
-          star.classList.add('collected');
-          star.textContent = '✨';
-          star.style.animation = 'none';
-          starsFound++;
+          light.classList.add('caught');
+          light.textContent = '✓';
+          lightsCaught++;
           playSoftNote();
           if (navigator.vibrate) navigator.vibrate(25);
 
-          skyHint.textContent = `Toca las 3 estrellas ocultas en el cielo ✨ (${starsFound}/${totalStarsToFind})`;
+          jarHint.textContent = `Luceros atrapados: ${lightsCaught} / ${totalLights} ✨`;
 
-          if (starsFound === totalStarsToFind) {
-            skyHint.textContent = "🌌 ¡Constelación completa! Desbloqueando mensaje...";
+          if (lightsCaught === totalLights) {
+            jarHint.textContent = "🌟 ¡Frasco lleno de calma! Desbloqueando mensaje...";
             setTimeout(() => {
               nightModal.style.display = 'flex';
               if (typeof confetti === 'function') {
@@ -364,13 +376,15 @@
               }
             }, 500);
           }
-        });
+        }
 
-        miniSky.appendChild(star);
+        light.addEventListener('click', catchLight);
+        light.addEventListener('touchstart', catchLight, { passive: false });
+        jarContainer.appendChild(light);
       });
     }
 
-    createMiniSky();
+    createJarGame();
 
     btnCloseModal.addEventListener('click', () => {
       nightModal.style.display = 'none';
