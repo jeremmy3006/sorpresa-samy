@@ -50,7 +50,6 @@
       text-decoration: none;
     }
 
-    /* Botón discreto para la música */
     .btn-music-toggle {
       background: rgba(135, 206, 250, 0.15);
       border: 1px solid rgba(135, 206, 250, 0.4);
@@ -395,8 +394,8 @@
 </head>
 <body>
 
-  <!-- AUDIO DE FONDO PARA EL ESPECIAL -->
-  <audio id="specialAudio" src="musica1.mp3" loop></audio>
+  <!-- AUDIO CONFIGURADO PARA REPRODUCIRSE AUTOMÁTICAMENTE -->
+  <audio id="specialAudio" src="musica1.mp3" autoplay loop></audio>
 
   <div class="top-nav-bar">
     <a href="index.html" class="back-btn">← Volver al Rincón</a>
@@ -470,16 +469,29 @@
     const headerBox = document.querySelector('.header-box');
     const specialAudio = document.getElementById('specialAudio');
     const musicToggleBtn = document.getElementById('musicToggleBtn');
-    let isMusicPlaying = false;
+    let isMusicPlaying = true;
 
-    // Intentar reproducir música al primer clic o interacción en la página
+    // Forzar intento de reproducción automática al cargar la página
+    window.addEventListener('DOMContentLoaded', () => {
+      specialAudio.volume = 0.5;
+      specialAudio.play().then(() => {
+        isMusicPlaying = true;
+        musicToggleBtn.textContent = "🔊 Música";
+      }).catch(err => {
+        console.log("El navegador bloqueó el autoplay estricto. Se activará al primer toque.");
+        isMusicPlaying = false;
+        musicToggleBtn.textContent = "🔇 Activar Música";
+      });
+    });
+
+    // Respaldo por si el navegador bloquea el autoplay inicial: primer clic en la página enciende la música
     window.addEventListener('click', () => {
       if (!isMusicPlaying && specialAudio.paused) {
         specialAudio.volume = 0.5;
         specialAudio.play().then(() => {
           isMusicPlaying = true;
           musicToggleBtn.textContent = "🔊 Música";
-        }).catch(e => console.log("Audio interactivo pendiente", e));
+        }).catch(e => {});
       }
     }, { once: true });
 
@@ -538,9 +550,10 @@
     function nextCard() {
       if (navigator.vibrate) navigator.vibrate(20);
       
-      const maxAllowed = maxIndexReached < princesas.length - 1 ? princesas.length - 2 : princesas.length - 1;
+      const maxAllowed = maxIndexReached < princesas.label ? princesas.length - 2 : princesas.length - 1; // corregido
+      const maxLimit = maxIndexReached < princesas.length - 1 ? princesas.length - 2 : princesas.length - 1;
       
-      if (currentIndex < maxAllowed) {
+      if (currentIndex < maxLimit) {
         currentIndex++;
         if (currentIndex > maxIndexReached) {
           maxIndexReached = currentIndex;
