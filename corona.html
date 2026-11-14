@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title> 14.11 👑✨</title>
+  <title>Crown.exe • 14.11 👑✨</title>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
     * {
@@ -32,10 +32,6 @@
       position: absolute;
       top: 16px;
       left: 16px;
-      right: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       z-index: 50;
     }
 
@@ -48,21 +44,6 @@
       font-size: 0.78rem;
       font-weight: 700;
       text-decoration: none;
-    }
-
-    .btn-music-toggle {
-      background: rgba(135, 206, 250, 0.15);
-      border: 1px solid rgba(135, 206, 250, 0.4);
-      color: #87ceeb;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.78rem;
-      font-weight: bold;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: background 0.2s;
     }
 
     .header-box {
@@ -394,12 +375,11 @@
 </head>
 <body>
 
-  <!-- AUDIO CONFIGURADO PARA REPRODUCIRSE AUTOMÁTICAMENTE -->
+  <!-- AUDIO DE FONDO QUE SUENA AUTOMÁTICAMENTE -->
   <audio id="specialAudio" src="musica1.mp3" autoplay loop></audio>
 
   <div class="top-nav-bar">
     <a href="index.html" class="back-btn">← Volver al Rincón</a>
-    <button class="btn-music-toggle" id="musicToggleBtn" onclick="toggleMusic()">🔊 Música</button>
   </div>
 
   <div class="header-box">
@@ -468,44 +448,21 @@
     const nightModal = document.getElementById('nightModal');
     const headerBox = document.querySelector('.header-box');
     const specialAudio = document.getElementById('specialAudio');
-    const musicToggleBtn = document.getElementById('musicToggleBtn');
-    let isMusicPlaying = true;
 
-    // Forzar intento de reproducción automática al cargar la página
+    // Reproducción automática al cargar e interacción de respaldo
     window.addEventListener('DOMContentLoaded', () => {
       specialAudio.volume = 0.5;
-      specialAudio.play().then(() => {
-        isMusicPlaying = true;
-        musicToggleBtn.textContent = "🔊 Música";
-      }).catch(err => {
-        console.log("El navegador bloqueó el autoplay estricto. Se activará al primer toque.");
-        isMusicPlaying = false;
-        musicToggleBtn.textContent = "🔇 Activar Música";
+      specialAudio.play().catch(err => {
+        console.log("Autoplay bloqueado inicialmente, se activará al hacer clic en cualquier parte.");
       });
     });
 
-    // Respaldo por si el navegador bloquea el autoplay inicial: primer clic en la página enciende la música
     window.addEventListener('click', () => {
-      if (!isMusicPlaying && specialAudio.paused) {
+      if (specialAudio.paused) {
         specialAudio.volume = 0.5;
-        specialAudio.play().then(() => {
-          isMusicPlaying = true;
-          musicToggleBtn.textContent = "🔊 Música";
-        }).catch(e => {});
+        specialAudio.play().catch(e => {});
       }
     }, { once: true });
-
-    function toggleMusic() {
-      if (isMusicPlaying) {
-        specialAudio.pause();
-        isMusicPlaying = false;
-        musicToggleBtn.textContent = "🔇 Silenciado";
-      } else {
-        specialAudio.play();
-        isMusicPlaying = true;
-        musicToggleBtn.textContent = "🔊 Música";
-      }
-    }
 
     function render3DCarousel() {
       container.innerHTML = '';
@@ -550,7 +507,6 @@
     function nextCard() {
       if (navigator.vibrate) navigator.vibrate(20);
       
-      const maxAllowed = maxIndexReached < princesas.label ? princesas.length - 2 : princesas.length - 1; // corregido
       const maxLimit = maxIndexReached < princesas.length - 1 ? princesas.length - 2 : princesas.length - 1;
       
       if (currentIndex < maxLimit) {
