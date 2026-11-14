@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Crown.exe • 14.11 👑✨</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 20%, #1a254c 0%, #0b0f19 70%, #030509 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 10px;
+      color: #ffffff;
+      overflow-x: hidden;
+      perspective: 1200px;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(135, 206, 250, 0.12);
+      border: 1px solid rgba(135, 206, 250, 0.3);
+      color: #87ceeb;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-decoration: none;
+      z-index: 50;
+    }
+
+    .header-box {
+      text-align: center;
+      max-width: 360px;
+      margin-bottom: 25px;
+      z-index: 10;
+    }
+
+    .header-box h1 {
+      font-size: 1.4rem;
+      color: #ffb6c1;
+      margin-bottom: 6px;
+      font-family: Georgia, serif;
+      text-shadow: 0 0 15px rgba(255, 182, 193, 0.4);
+    }
+
+    .header-box p {
+      font-size: 0.84rem;
+      color: #e0f7fa;
+      line-height: 1.4;
+    }
+
+    /* --- CONTENEDOR DEL CARRUSEL 3D --- */
+    .carousel-3d-container {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      height: 340px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-style: preserve-3d;
+      margin-bottom: 25px;
+    }
+
+    .card-3d {
+      position: absolute;
+      width: 210px;
+      height: 290px;
+      background: rgba(16, 25, 53, 0.92);
+      backdrop-filter: blur(12px);
+      border: 1.5px solid rgba(135, 206, 250, 0.3);
+      border-radius: 20px;
+      padding: 22px 16px;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+      transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .card-3d.center {
+      transform: translateX(0) scale(1) translateZ(0deg);
+      z-index: 10;
+      border-color: #87ceeb;
+      box-shadow: 0 20px 45px rgba(135, 206, 250, 0.35);
+    }
+
+    .card-3d.left {
+      transform: translateX(-110px) scale(0.82) rotateY(22deg) translateZ(-50px);
+      z-index: 5;
+      opacity: 0.55;
+      filter: brightness(0.7);
+    }
+
+    .card-3d.right {
+      transform: translateX(110px) scale(0.82) rotateY(-22deg) translateZ(-50px);
+      z-index: 5;
+      opacity: 0.55;
+      filter: brightness(0.7);
+    }
+
+    .card-3d.hidden-side {
+      transform: translateX(0) scale(0.6) translateZ(-100px);
+      z-index: 1;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .card-3d.center.samy-card {
+      background: linear-gradient(135deg, rgba(26,37,76,0.95) 0%, rgba(74,20,140,0.95) 100%);
+      border-color: #ffb6c1;
+      box-shadow: 0 20px 50px rgba(255, 182, 193, 0.45);
+    }
+
+    .card-avatar {
+      font-size: 3.5rem;
+      margin-top: 10px;
+      animation: floatAvatar 2.5s infinite ease-in-out alternate;
+    }
+
+    @keyframes floatAvatar {
+      from { transform: translateY(0); }
+      to { transform: translateY(-4px); }
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      color: #ffd166;
+      font-weight: 700;
+      font-family: Georgia, serif;
+      margin-bottom: 6px;
+    }
+
+    .samy-card .card-title {
+      color: #ffb6c1;
+      font-size: 1.15rem;
+    }
+
+    .card-virtue {
+      font-size: 0.78rem;
+      color: #e0f7fa;
+      line-height: 1.45;
+      font-family: Georgia, serif;
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .carousel-actions {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      z-index: 20;
+    }
+
+    .btn-3d-nav {
+      background: rgba(135, 206, 250, 0.15);
+      border: 1.5px solid rgba(135, 206, 250, 0.4);
+      color: #87ceeb;
+      padding: 10px 22px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+      transition: all 0.2s;
+    }
+
+    .btn-3d-nav:hover {
+      background: rgba(135, 206, 250, 0.3);
+      transform: scale(1.05);
+    }
+
+    .btn-coronation {
+      display: none;
+      width: 100%;
+      background: linear-gradient(135deg, #ffd166 0%, #ff758c 100%);
+      color: #0d1324;
+      border: none;
+      padding: 11px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(255, 209, 102, 0.4);
+      margin-top: 10px;
+    }
+
+    .lock-hint {
+      font-size: 0.75rem;
+      color: #ffb6c1;
+      margin-top: 10px;
+      font-style: italic;
+    }
+
+    /* --- INTRO MÁGICA: ENTREGA DE CORONA --- */
+    .intro-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 30%, #1a2a47 0%, #060913 70%, #020306 100%);
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      animation: fadeInIntro 0.5s ease;
+    }
+
+    @keyframes fadeInIntro {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .disney-castle-glow {
+      font-size: 3.5rem;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 0 20px #87ceeb);
+      animation: pulseCastle 2s infinite ease-in-out alternate;
+    }
+
+    @keyframes pulseCastle {
+      from { transform: scale(1); filter: drop-shadow(0 0 10px #87ceeb); }
+      to { transform: scale(1.08); filter: drop-shadow(0 0 25px #ffb6c1); }
+    }
+
+    .intro-title {
+      font-size: 1.2rem;
+      color: #87ceeb;
+      font-family: Georgia, serif;
+      margin-bottom: 15px;
+      letter-spacing: 1px;
+    }
+
+    .intro-crown-box {
+      font-size: 2rem;
+      margin: 15px 0;
+      animation: deliverCrown 2.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes deliverCrown {
+      0% { transform: scale(0.2) translateY(-40px); opacity: 0; filter: drop-shadow(0 0 0px #ffd166); }
+      50% { opacity: 1; filter: drop-shadow(0 0 30px #ffd166); }
+      100% { transform: scale(2.2) translateY(0); opacity: 1; filter: drop-shadow(0 0 45px #ffd166); }
+    }
+
+    .intro-subtitle {
+      font-size: 0.9rem;
+      color: #e0f7fa;
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      max-width: 320px;
+      margin-top: 25px;
+      opacity: 0;
+      animation: fadeInText 1s ease 1.8s forwards;
+    }
+
+    @keyframes fadeInText {
+      to { opacity: 1; }
+    }
+
+    .btn-enter-samy {
+      margin-top: 25px;
+      background: linear-gradient(135deg, #87ceeb 0%, #ffb6c1 100%);
+      color: #0d1324;
+      border: none;
+      padding: 11px 24px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 0.88rem;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(135, 206, 250, 0.4);
+      opacity: 0;
+      animation: fadeInText 1s ease 2.3s forwards;
+    }
+
+    /* MODAL DE CARTA Y CORONA FINAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 3, 6, 0.94);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 400;
+    }
+
+    .modal-paper {
+      background: linear-gradient(180deg, #16203b 0%, #0d1324 100%);
+      color: #ffffff;
+      width: 100%;
+      max-width: 335px;
+      border-radius: 22px;
+      padding: 26px 18px;
+      border: 2.5px solid #ffd166;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      position: relative;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .wax-seal {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #ffd166 0%, #f4a261 100%);
+      border: 2px solid #ffb6c1;
+      margin: -48px auto 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: Georgia, serif;
+      font-size: 1.3rem; font-weight: bold; color: #131b35;
+    }
+
+    .crown-display {
+      font-size: 3.2rem;
+      margin-bottom: 6px;
+      animation: floatCrown 3s infinite ease-in-out alternate;
+    }
+
+    @keyframes floatCrown {
+      from { transform: translateY(0) rotate(-3deg); }
+      to { transform: translateY(-6px) rotate(3deg); }
+    }
+
+    .modal-paper h3 {
+      color: #ffd166;
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+      font-family: Georgia, serif;
+    }
+
+    .modal-paper p {
+      font-size: 0.84rem;
+      line-height: 1.55;
+      color: #e0f7fa;
+      margin-bottom: 16px;
+      font-family: Georgia, serif;
+      text-align: left;
+    }
+
+    .btn-close-modal {
+      background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 14px;
+      font-weight: bold;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <a href="index.html" class="back-btn">← Volver al Rincón</a>
+
+  <div class="header-box">
+    <h1>Crown.exe • 14.11 👑</h1>
+    <p>Explora el catálogo de princesas. La última tarjeta se desbloqueará al ver todas las anteriores:</p>
+  </div>
+
+  <!-- CONTENEDOR 3D DEL CARRUSEL -->
+  <div class="carousel-3d-container" id="carousel3DContainer"></div>
+
+  <!-- CONTROLES -->
+  <div class="carousel-actions">
+    <button class="btn-3d-nav" onclick="prevCard()">← Anterior</button>
+    <button class="btn-3d-nav" onclick="nextCard()">Siguiente →</button>
+  </div>
+
+  <!-- --- INTRO MÁGICA: ENTREGA DE CORONA --- -->
+  <div class="intro-overlay" id="introOverlay">
+    <div class="disney-castle-glow">🏰✨</div>
+    <div class="intro-title">Magia del Sistema • 14.11</div>
+    <div class="intro-crown-box">👑</div>
+    <div class="intro-subtitle">
+      "Como en los mejores cuentos, cada detalle tiene su propósito... Y te entrego esta corona porque en mi universo, tú eres la reina absoluta." 🥺✨
+    </div>
+    <button class="btn-enter-samy" onclick="showFinalCard()">Abrir Carta Secreta 💌</button>
+  </div>
+
+  <!-- MODAL DE CARTA Y CORONA FINAL (TÍMIDO Y CON INDIRECTAS) -->
+  <div class="modal-overlay" id="nightModal">
+    <div class="modal-paper">
+      <div class="wax-seal">👑</div>
+      <div class="crown-display">👑✨</div>
+      <h3>Samy 💜</h3>
+      <p>
+        Ehh... me da un poco de pena enviarte esto porque sabes que no suelo ponerme tan cursi, pero hoy me puse a pensar un rato y me di cuenta de algo.<br><br>
+        Pensando en tantas historias, me puse a compararte y la verdad... eres más hermosa que Cenicienta, más brillante que Bella y tienes una vibra muchísimo más linda que cualquiera de los cuentos clásicos que conocía.<br><br>
+        No podría compararte con una sola princesa porque siento que tienes lo mejor de cada una, pero de una forma que a mí, la verdad, me parece increíble y me alegra un montón conocerte. Ojalá esto te saque una sonrisa y no te parezca muy raro de mi parte. 🥺✨
+      </p>
+      <button class="btn-close-modal" id="btnCloseModal">Guardar esto con una sonrisa 💜</button>
+    </div>
+  </div>
+
+  <script>
+    const princesas = [
+      { emoji: "🍎", name: "Blancanieves", virtue: "Optimismo, dulzura y contagiar alegría a todos. ✨" },
+      { emoji: "🥿", name: "Cenicienta", virtue: "Amabilidad inquebrantable, paciencia y un corazón noble. 💙" },
+      { emoji: "💤", name: "Aurora", virtue: "Elegancia natural, espíritu soñador y una paz increíble. 🌙" },
+      { emoji: "🌊", name: "Ariel", virtue: "Curiosidad constante, entusiasmo y ganas de descubrir horizontes. 🙈" },
+      { emoji: "🌹", name: "Bella", virtue: "Inteligencia sobresaliente y ver más allá de lo superficial. 🤍" },
+      { emoji: "🧞‍♂️", name: "Jasmín", virtue: "Independencia, sinceridad y firmeza para defender ideales. 🌷" },
+      { emoji: "☀️", name: "Rapunzel", virtue: "Creatividad desbordante y energía espontánea que ilumina todo. ⭐" },
+      { emoji: "🍃", name: "Pocahontas", virtue: "Sabiduría profunda y conexión sincera con su entorno. 🌿" },
+      { emoji: "⚔️", name: "Mulán", virtue: "Lealtad incondicional, ingenio y un coraje enorme. 🥺" },
+      { emoji: "⭐", name: "Tiana", virtue: "Determinación férrea, pasión y esfuerzo constante. 💪" },
+      { emoji: "🏹", name: "Mérida", virtue: "Autenticidad absoluta y valentía de ser fiel a su esencia. 🌸" },
+      { emoji: "🌊🛶", name: "Moana", virtue: "Intuición aguda, fuerza interior y apoyo incondicional. 🌊" },
+      { emoji: "🐉", name: "Raya", virtue: "Astucia brillante y un corazón dispuesto a confiar. 🌙" },
+      { emoji: "👑💜", name: "Mi Princesa Favorita: Samy", virtue: "La excepción más bonita y la única que de verdad me importa. ✨", isSamy: true }
+    ];
+
+    let currentIndex = 0;
+    let maxIndexReached = 0;
+
+    const container = document.getElementById('carousel3DContainer');
+    const introOverlay = document.getElementById('introOverlay');
+    const nightModal = document.getElementById('nightModal');
+    const headerBox = document.querySelector('.header-box');
+
+    function render3DCarousel() {
+      container.innerHTML = '';
+
+      princesas.forEach((p, idx) => {
+        if (p.isSamy && maxIndexReached < princesas.length - 1) return;
+
+        const card = document.createElement('div');
+        card.className = 'card-3d';
+
+        if (idx === currentIndex) {
+          card.classList.add('center');
+          if (p.isSamy) card.classList.add('samy-card');
+        } else if (idx === (currentIndex - 1 + princesas.length) % princesas.length) {
+          card.classList.add('left');
+        } else if (idx === (currentIndex + 1) % princesas.length) {
+          card.classList.add('right');
+        } else {
+          card.classList.add('hidden-side');
+        }
+
+        let buttonHtml = '';
+        if (p.isSamy && idx === currentIndex) {
+          buttonHtml = `<button class="btn-coronation" style="display:block;" onclick="startMagicIntro()">👑 Recibir Corona</button>`;
+        } else if (idx === currentIndex && !p.isSamy && maxIndexReached < princesas.length - 1) {
+          buttonHtml = `<div class="lock-hint">Desliza para avanzar y descubrir la última tarjeta 🔒</div>`;
+        }
+
+        card.innerHTML = `
+          <div>
+            <div class="card-avatar">${p.emoji}</div>
+            <div class="card-title">${p.name}</div>
+          </div>
+          <div class="card-virtue">${p.virtue}</div>
+          ${buttonHtml}
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function nextCard() {
+      if (navigator.vibrate) navigator.vibrate(20);
+      
+      const maxAllowed = maxIndexReached < princesas.length - 1 ? princesas.length - 2 : princesas.length - 1;
+      
+      if (currentIndex < maxAllowed) {
+        currentIndex++;
+        if (currentIndex > maxIndexReached) {
+          maxIndexReached = currentIndex;
+        }
+      } else if (currentIndex === princesas.length - 2) {
+        currentIndex = princesas.length - 1;
+        maxIndexReached = princesas.length - 1;
+      } else {
+        currentIndex = 0;
+      }
+      render3DCarousel();
+    }
+
+    function prevCard() {
+      if (navigator.vibrate) navigator.vibrate(20);
+      currentIndex = (currentIndex - 1 + princesas.length) % princesas.length;
+      if (currentIndex === princesas.length - 1 && maxIndexReached < princesas.length - 1) {
+        currentIndex = princesas.length - 2;
+      }
+      render3DCarousel();
+    }
+
+    function startMagicIntro() {
+      if (navigator.vibrate) navigator.vibrate([40, 50, 90]);
+      headerBox.style.display = 'none';
+      container.style.display = 'none';
+      document.querySelector('.carousel-actions').style.display = 'none';
+      introOverlay.style.display = 'flex';
+
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.4 },
+          colors: ['#87ceeb', '#ffb6c1', '#ffd166', '#ffffff']
+        });
+      }
+    }
+
+    function showFinalCard() {
+      if (navigator.vibrate) navigator.vibrate(30);
+      introOverlay.style.display = 'none';
+      nightModal.style.display = 'flex';
+
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 140,
+          spread: 100,
+          origin: { y: 0.5 },
+          colors: ['#ffd166', '#ffb6c1', '#87ceeb', '#ffffff']
+        });
+      }
+    }
+
+    document.getElementById('btnCloseModal').addEventListener('click', () => {
+      nightModal.style.display = 'none';
+    });
+
+    render3DCarousel();
+  </script>
+</body>
+</html>
