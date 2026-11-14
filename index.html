@@ -198,7 +198,6 @@
       text-transform: uppercase;
     }
 
-    /* Botón de control de música discretamente integrado */
     .btn-music-toggle {
       background: rgba(135, 206, 250, 0.15);
       border: 1px solid rgba(135, 206, 250, 0.4);
@@ -422,6 +421,10 @@
       background-image: linear-gradient(to top, rgba(11,15,25,0.95) 15%, rgba(74,20,140,0.3) 70%), url('https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=400&auto=format&fit=crop');
     }
 
+    .card-bg-4 {
+      background-image: linear-gradient(to top, rgba(11,15,25,0.95) 15%, rgba(13,19,36,0.3) 70%), url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=400&auto=format&fit=crop');
+    }
+
     .card-content-overlay {
       padding: 12px 10px;
       width: 100%;
@@ -572,6 +575,15 @@
           </div>
         </a>
 
+        <!-- Tarjeta 4: Buenas Noches -->
+        <a href="buenastnoches.html" class="netflix-card card-bg-4">
+          <div class="card-label-top" style="background: #4facfe;">🌙 Estelar</div>
+          <div class="card-content-overlay">
+            <div class="card-title-text">Buenas Noches</div>
+            <div class="card-teaser">Pensamientos suaves y de calma para leer justo antes de cerrar los ojitos.</div>
+          </div>
+        </a>
+
       </div>
     </div>
 
@@ -613,7 +625,6 @@
           profileGate.style.display = 'none';
           mainApp.style.display = 'block';
           
-          // Reproducir música al ingresar correctamente
           bgMusic.volume = 0.5;
           bgMusic.play().then(() => {
             isMusicPlaying = true;
