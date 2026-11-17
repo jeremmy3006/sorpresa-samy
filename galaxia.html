@@ -41,7 +41,91 @@
             z-index: 1;
         }
 
-        /* Pantalla de Bienvenida */
+        /* Pantalla de Contraseña / Acceso */
+        #password-gate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #230a45 0%, #04010f 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        .gate-card {
+            background: rgba(16, 25, 53, 0.9);
+            backdrop-filter: blur(14px);
+            border: 1.5px solid rgba(255, 182, 193, 0.4);
+            border-radius: 24px;
+            padding: 30px 22px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+        }
+
+        .gate-card h2 {
+            font-size: 1.3rem;
+            color: #ffb6c1;
+            margin-bottom: 10px;
+            font-family: Georgia, serif;
+        }
+
+        .gate-card p {
+            font-size: 0.88rem;
+            color: #e0f7fa;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .pass-input {
+            width: 100%;
+            padding: 12px;
+            background: #131b35;
+            border: 1px solid #87ceeb;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            margin-bottom: 14px;
+        }
+
+        .pass-input:focus {
+            outline: none;
+            border-color: #ffb6c1;
+        }
+
+        .btn-pass-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #ff758c 0%, #6ba4ff 100%);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(107, 164, 255, 0.5);
+            transition: transform 0.2s;
+        }
+
+        .btn-pass-submit:hover {
+            transform: scale(1.03);
+        }
+
+        .pass-error {
+            color: #ff8da1;
+            font-size: 0.82rem;
+            margin-top: 10px;
+            min-height: 20px;
+        }
+
+        /* Pantalla de Bienvenida (después de la contraseña) */
         #welcome-screen {
             position: fixed;
             top: 0;
@@ -54,6 +138,8 @@
             justify-content: center;
             align-items: center;
             z-index: 100;
+            opacity: 0;
+            visibility: hidden;
             transition: opacity 1.5s ease, visibility 1.5s ease;
         }
 
@@ -232,7 +318,18 @@
 </head>
 <body>
 
-    <!-- Elemento de Audio (Asegúrate de tener tu archivo musica3.mp3 en la misma carpeta) -->
+    <!-- Pantalla de Contraseña -->
+    <div id="password-gate">
+        <div class="gate-card">
+            <h2>🌌 Acceso Restringido</h2>
+            <p>Para ingresar a este espacio, escribe lo que siento por ti:</p>
+            <input type="text" id="passInput" class="pass-input" placeholder="Escribe la contraseña..." autocomplete="off">
+            <button class="btn-pass-submit" onclick="verifyPassword()">Desbloquear 🚀</button>
+            <div class="pass-error" id="passError"></div>
+        </div>
+    </div>
+
+    <!-- Elemento de Audio -->
     <audio id="bg-music" src="musica3.mp3" preload="auto" loop></audio>
 
     <!-- Pantalla de Bienvenida -->
@@ -263,6 +360,33 @@
     </div>
 
     <script>
+        // Verificación de Contraseña
+        function verifyPassword() {
+            const passInput = document.getElementById('passInput');
+            const passError = document.getElementById('passError');
+            const enteredValue = passInput.value.trim().toLowerCase();
+
+            if (enteredValue === "me gustas") {
+                const gate = document.getElementById('password-gate');
+                gate.style.opacity = '0';
+                gate.style.visibility = 'hidden';
+
+                const welcome = document.getElementById('welcome-screen');
+                welcome.style.opacity = '1';
+                welcome.style.visibility = 'visible';
+            } else {
+                passError.textContent = "Contraseña incorrecta. Pista: Es lo que siento por ti 🤭";
+                passInput.value = "";
+                passInput.focus();
+            }
+        }
+
+        document.getElementById('passInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                verifyPassword();
+            }
+        });
+
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
 
@@ -474,7 +598,6 @@
         function startExperience() {
             isStarted = true;
             
-            // Reproducir música al hacer clic en el botón
             const music = document.getElementById('bg-music');
             music.play().catch(error => {
                 console.log("Audio play blocked or missing file:", error);
