@@ -41,7 +41,7 @@
             z-index: 1;
         }
 
-        /* Pantalla de Contraseña / Acceso */
+        /* Pantalla de Contraseña / Acceso limpia */
         #password-gate {
             position: fixed;
             top: 0;
@@ -125,7 +125,7 @@
             min-height: 20px;
         }
 
-        /* Pantalla de Bienvenida (después de la contraseña) */
+        /* Pantalla de Bienvenida */
         #welcome-screen {
             position: fixed;
             top: 0;
@@ -318,11 +318,11 @@
 </head>
 <body>
 
-    <!-- Pantalla de Contraseña -->
+    <!-- Pantalla de Contraseña limpia -->
     <div id="password-gate">
         <div class="gate-card">
             <h2>🌌 Acceso Restringido</h2>
-            <p>Para ingresar a este espacio, escribe lo que siento por ti:</p>
+            <p>Ingresa la contraseña:</p>
             <input type="text" id="passInput" class="pass-input" placeholder="Escribe la contraseña..." autocomplete="off">
             <button class="btn-pass-submit" onclick="verifyPassword()">Desbloquear 🚀</button>
             <div class="pass-error" id="passError"></div>
@@ -360,13 +360,19 @@
     </div>
 
     <script>
-        // Verificación de Contraseña
+        // Verificación de Contraseña y arranque de música seguro
         function verifyPassword() {
             const passInput = document.getElementById('passInput');
             const passError = document.getElementById('passError');
             const enteredValue = passInput.value.trim().toLowerCase();
 
             if (enteredValue === "me gustas") {
+                // Reproducir la música justo al validar la contraseña (permiso del navegador concedido)
+                const music = document.getElementById('bg-music');
+                music.play().catch(error => {
+                    console.log("Audio play error:", error);
+                });
+
                 const gate = document.getElementById('password-gate');
                 gate.style.opacity = '0';
                 gate.style.visibility = 'hidden';
@@ -375,7 +381,7 @@
                 welcome.style.opacity = '1';
                 welcome.style.visibility = 'visible';
             } else {
-                passError.textContent = "Contraseña incorrecta. Pista: Es lo que siento por ti 🤭";
+                passError.textContent = "Contraseña incorrecta. Inténtalo de nuevo 🤭";
                 passInput.value = "";
                 passInput.focus();
             }
@@ -597,11 +603,6 @@
 
         function startExperience() {
             isStarted = true;
-            
-            const music = document.getElementById('bg-music');
-            music.play().catch(error => {
-                console.log("Audio play blocked or missing file:", error);
-            });
 
             const welcome = document.getElementById('welcome-screen');
             welcome.style.opacity = '0';
