@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para ti, Samy 🩵🩷</title>
+    <!-- Three.js y OrbitControls para rotación 360 completa -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background: #04010f;
+            overflow: hidden;
+            color: #fff;
+            touch-action: none;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Pantalla de Bienvenida */
+        #welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #230a45 0%, #04010f 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 1.5s ease, visibility 1.5s ease;
+        }
+
+        .welcome-preview {
+            font-size: 75px;
+            margin-bottom: 20px;
+            animation: pulseGlow 2s infinite alternate;
+            filter: drop-shadow(0 0 30px rgba(100, 180, 255, 0.8));
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(255, 141, 161, 0.6)); }
+            100% { transform: scale(1.1); filter: drop-shadow(0 0 35px rgba(100, 180, 255, 0.9)); }
+        }
+
+        .open-btn {
+            background: linear-gradient(135deg, #ff8da1, #6ba4ff);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 0 25px rgba(107, 164, 255, 0.6);
+            transition: all 0.3s ease;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .open-btn:hover {
+            transform: scale(1.06);
+            box-shadow: 0 0 35px rgba(255, 141, 161, 0.9);
+        }
+
+        /* Título Superior */
+        .header-title {
+            position: fixed;
+            top: 40px;
+            width: 100%;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            color: #ffd1df;
+            text-shadow: 0 0 12px rgba(255, 141, 161, 0.8);
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            pointer-events: none;
+        }
+
+        /* Frases en Órbita */
+        #phrases-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+
+        .orbit-phrase {
+            position: absolute;
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+            background: rgba(25, 10, 45, 0.7);
+            padding: 6px 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 141, 161, 0.4);
+            backdrop-filter: blur(6px);
+            text-shadow: 0 0 8px rgba(255, 141, 161, 0.9);
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Botón de Carta Flotante */
+        .letter-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #6ba4ff, #ff8da1);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 0 25px rgba(255, 141, 161, 0.7);
+            z-index: 50;
+            transition: transform 0.2s ease;
+            font-size: 22px;
+            opacity: 0;
+            visibility: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .letter-btn.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .letter-btn:hover {
+            transform: scale(1.12);
+        }
+
+        /* Modal Súper Tierno y Cursi */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(4, 1, 15, 0.88);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #2b0f4a, #120326);
+            border: 1px solid rgba(255, 141, 161, 0.5);
+            padding: 35px 28px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 85vh;
+            overflow-y: auto;
+            border-radius: 26px;
+            box-shadow: 0 0 50px rgba(255, 141, 161, 0.35);
+            position: relative;
+            text-align: left;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 18px;
+            background: none;
+            border: none;
+            color: #ff8da1;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .modal-content h3 {
+            color: #ffd1df;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .modal-content p {
+            color: #f3e5f5;
+            font-size: 0.93rem;
+            line-height: 1.65;
+            font-weight: 400;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Elemento de Audio (Asegúrate de tener tu archivo musica3.mp3 en la misma carpeta) -->
+    <audio id="bg-music" src="musica3.mp3" preload="auto" loop></audio>
+
+    <!-- Pantalla de Bienvenida -->
+    <div id="welcome-screen">
+        <div class="welcome-preview">✨</div>
+        <button class="open-btn" onclick="startExperience()">
+            Abrir mi corazoncito para Samy 🩵🩷
+        </button>
+    </div>
+
+    <div class="header-title" id="mainTitle">Para Samy, con toda la ilusión 🩵✨</div>
+    <div id="canvas-container"></div>
+    <div id="phrases-container"></div>
+
+    <div class="letter-btn" id="letterBtn" onclick="toggleModal(true)">💌</div>
+
+    <!-- Modal con la carta perfecta -->
+    <div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target === this) toggleModal(false)">
+        <div class="modal-content">
+            <button class="modal-close" onclick="toggleModal(false)">✕</button>
+            <h3>Para Samy 🩵🩷</h3>
+            <p>¿Te acuerdas cuando nos conocimos? 🤭 Cuando te vi por primera vez, la verdad pensé que eras una niñita... ¡quién diría que terminarías robándome la atención así de rápido!</p>
+            <p>Sé muy bien que uno no se enamora de la noche a la mañana, ¡así que vamos paso a paso! Pero quiero que sepas que me gustas muchísimo tal como eres. Disfruto cada momento que compartimos y cada risa.</p>
+            <p>Por ejemplo, verte todos los días en el gimnasio —aunque sea por un instante breve— ya se volvió mi parte favorita de la rutina (y confieso que a veces me distraigo un poquito viéndote). 🤭💪</p>
+            <p>Me gustas un montón, me encanta todo de ti, y haré de todo con tal de enamorarte y hacer que sientas lo mismo por mí. 🩵✨</p>
+            <p>Espero que te guste esta galaxia que te hice, y al medio te entrego mi corazón. 🌌💖</p>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 32);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.rotateSpeed = 0.8;
+        controls.enableZoom = false;
+
+        const renderScene = new THREE.RenderPass(scene, camera);
+        const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 2.2, 0.6, 0.7);
+        const composer = new THREE.EffectComposer(renderer);
+        composer.addPass(renderScene);
+        composer.addPass(bloomPass);
+
+        function createSoftGlowTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            gradient.addColorStop(0.3, 'rgba(100, 180, 255, 0.85)');
+            gradient.addColorStop(0.7, 'rgba(255, 140, 190, 0.3)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 128, 128);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const softGlowTexture = createSoftGlowTexture();
+
+        const colPink = new THREE.Color(0xff8da1);
+        const colBlue = new THREE.Color(0x6ba4ff);
+        const colLightBlue = new THREE.Color(0xc4d9ff);
+
+        const heartGroup = new THREE.Group();
+        scene.add(heartGroup);
+
+        const heartParticleCount = 8000;
+        const heartGeo = new THREE.BufferGeometry();
+        const heartPos = new Float32Array(heartParticleCount * 3);
+        const heartCols = new Float32Array(heartParticleCount * 3);
+
+        for (let i = 0; i < heartParticleCount; i++) {
+            let i3 = i * 3;
+            let t = Math.random() * Math.PI * 2;
+            let u = Math.random() * Math.PI;
+            let fill = Math.random();
+
+            let x = 16 * Math.pow(Math.sin(t), 3) * fill;
+            let y = (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) * fill;
+            let z = (Math.random() - 0.5) * 8 * Math.sin(u) * fill;
+
+            let scale = 0.55;
+            heartPos[i3] = x * scale;
+            heartPos[i3 + 1] = (y * scale) + 1.2;
+            heartPos[i3 + 2] = z * scale;
+
+            let mixedColor = Math.random() > 0.5 ? colPink : (Math.random() > 0.5 ? colBlue : colLightBlue);
+            heartCols[i3] = mixedColor.r;
+            heartCols[i3 + 1] = mixedColor.g;
+            heartCols[i3 + 2] = mixedColor.b;
+        }
+
+        heartGeo.setAttribute('position', new THREE.BufferAttribute(heartPos, 3));
+        heartGeo.setAttribute('color', new THREE.BufferAttribute(heartCols, 3));
+
+        const particleMaterial = new THREE.PointsMaterial({
+            size: 0.32,
+            map: softGlowTexture,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.95,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
+        });
+
+        const heartPoints = new THREE.Points(heartGeo, particleMaterial);
+        heartGroup.add(heartPoints);
+
+        const baseParticleCount = 1200;
+        const baseGeo = new THREE.BufferGeometry();
+        const basePos = new Float32Array(baseParticleCount * 3);
+        const baseCols = new Float32Array(baseParticleCount * 3);
+
+        for (let i = 0; i < baseParticleCount; i++) {
+            let i3 = i * 3;
+            let r = Math.random() * 6;
+            let theta = Math.random() * Math.PI * 2;
+
+            basePos[i3] = Math.cos(theta) * r;
+            basePos[i3 + 1] = -6.5 + (Math.random() - 0.5) * 0.4;
+            basePos[i3 + 2] = Math.sin(theta) * r;
+
+            let c = Math.random() > 0.5 ? colPink : colBlue;
+            baseCols[i3] = c.r;
+            baseCols[i3 + 1] = c.g;
+            baseCols[i3 + 2] = c.b;
+        }
+
+        baseGeo.setAttribute('position', new THREE.BufferAttribute(basePos, 3));
+        baseGeo.setAttribute('color', new THREE.BufferAttribute(baseCols, 3));
+
+        const basePoints = new THREE.Points(baseGeo, particleMaterial);
+        heartGroup.add(basePoints);
+
+        const galaxyParticleCount = 4500;
+        const galaxyGeo = new THREE.BufferGeometry();
+        const galaxyPos = new Float32Array(galaxyParticleCount * 3);
+        const galaxyCols = new Float32Array(galaxyParticleCount * 3);
+
+        for (let i = 0; i < galaxyParticleCount; i++) {
+            let i3 = i * 3;
+            let radius = Math.random() * 38 + 6;
+            let spinAngle = i * 0.1;
+
+            galaxyPos[i3] = Math.cos(spinAngle) * radius;
+            galaxyPos[i3 + 1] = (Math.random() - 0.5) * 22;
+            galaxyPos[i3 + 2] = Math.sin(spinAngle) * radius;
+
+            let c = Math.random() > 0.5 ? colPink : colBlue;
+            galaxyCols[i3] = c.r;
+            galaxyCols[i3 + 1] = c.g;
+            galaxyCols[i3 + 2] = c.b;
+        }
+
+        galaxyGeo.setAttribute('position', new THREE.BufferAttribute(galaxyPos, 3));
+        galaxyGeo.setAttribute('color', new THREE.BufferAttribute(galaxyCols, 3));
+
+        const galaxyPoints = new THREE.Points(galaxyGeo, particleMaterial);
+        scene.add(galaxyPoints);
+
+        const shootingStarsCount = 5;
+        const shootingStars = [];
+        for (let i = 0; i < shootingStarsCount; i++) {
+            const starGeo = new THREE.BufferGeometry();
+            const positions = new Float32Array(6);
+            starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            
+            const starMat = new THREE.LineBasicMaterial({
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending
+            });
+
+            const starLine = new THREE.Line(starGeo, starMat);
+            scene.add(starLine);
+
+            shootingStars.push({
+                mesh: starLine,
+                x: (Math.random() - 0.5) * 50,
+                y: Math.random() * 30 + 10,
+                z: (Math.random() - 0.5) * 20,
+                speed: Math.random() * 0.4 + 0.3,
+                active: false,
+                delay: Math.random() * 100
+            });
+        }
+
+        const phraseTexts = [
+            "Me encantas muchísimo Samy 🩷",
+            "Te veo en el gym y me alegras el día 💪✨",
+            "Tus ojitos me fascinan 🩵",
+            "Pienso en ti más de lo que imaginas 💭",
+            "Cada momento contigo es genial 💫",
+            "Me encanta cómo eres 🌸",
+            "Tu voz es mi favorita 🎶",
+            "Me gustas un montón 💓",
+            "Adoro hablar contigo 💬",
+            "Eres mi persona favorita 🌷",
+            "Voy a conquistarte de a poco ✨",
+            "Qué bonita sonrisa tienes 😊",
+            "Me haces sonreír sin querer 🌙",
+            "Disfruto tanto verte 🤍",
+            "Me encantas demasiado 🩵",
+            "Haré de todo para enamorarte 🌻"
+        ];
+
+        const phrasesContainer = document.getElementById('phrases-container');
+        const orbitPhrases = [];
+
+        for (let i = 0; i < phraseTexts.length; i++) {
+            const el = document.createElement('div');
+            el.className = 'orbit-phrase';
+            el.innerText = phraseTexts[i];
+            phrasesContainer.appendChild(el);
+
+            orbitPhrases.push({
+                element: el,
+                angle: (i / phraseTexts.length) * Math.PI * 2,
+                radius: Math.random() * 40 + 110,
+                speed: (Math.random() * 0.0015 + 0.0005) * (i % 2 === 0 ? 1 : -1),
+                yOffset: (Math.random() - 0.5) * 130
+            });
+        }
+
+        let isStarted = false;
+
+        function startExperience() {
+            isStarted = true;
+            
+            // Reproducir música al hacer clic en el botón
+            const music = document.getElementById('bg-music');
+            music.play().catch(error => {
+                console.log("Audio play blocked or missing file:", error);
+            });
+
+            const welcome = document.getElementById('welcome-screen');
+            welcome.style.opacity = '0';
+            welcome.style.visibility = 'hidden';
+
+            document.getElementById('mainTitle').style.opacity = '1';
+            document.getElementById('phrases-container').style.opacity = '1';
+            document.getElementById('letterBtn').classList.add('visible');
+        }
+
+        let clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+
+            if (isStarted) {
+                let heartbeat = 1 + Math.sin(elapsedTime * 4) * 0.03;
+                heartPoints.scale.set(heartbeat, heartbeat, heartbeat);
+
+                galaxyPoints.rotation.y = elapsedTime * 0.04;
+
+                shootingStars.forEach(s => {
+                    if (s.delay > 0) {
+                        s.delay--;
+                    } else {
+                        s.x -= s.speed;
+                        s.y -= s.speed * 0.6;
+                        if (s.x < -40 || s.y < -30) {
+                            s.x = Math.random() * 40 + 20;
+                            s.y = Math.random() * 20 + 15;
+                            s.delay = Math.random() * 150 + 50;
+                        }
+                        const pos = s.mesh.geometry.attributes.position;
+                        pos.setXYZ(0, s.x, s.y, s.z);
+                        pos.setXYZ(1, s.x + 3, s.y + 1.8, s.z);
+                        pos.needsUpdate = true;
+                    }
+                });
+
+                controls.update();
+
+                orbitPhrases.forEach(p => {
+                    p.angle += p.speed;
+                    const x3d = Math.cos(p.angle) * (p.radius * 0.09);
+                    const z3d = Math.sin(p.angle) * (p.radius * 0.09);
+                    const y3d = (p.yOffset * 0.04) + Math.sin(elapsedTime + p.angle) * 0.4;
+
+                    const vector = new THREE.Vector3(x3d, y3d, z3d);
+                    vector.project(camera);
+
+                    const xPx = (vector.x * .5 + .5) * window.innerWidth;
+                    const yPx = (-(vector.y * .5) + .5) * window.innerHeight;
+
+                    p.element.style.left = `${xPx}px`;
+                    p.element.style.top = `${yPx}px`;
+                });
+            }
+
+            composer.render();
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        function toggleModal(show) {
+            const modal = document.getElementById('modalBackdrop');
+            if (show) modal.classList.add('active');
+            else modal.classList.remove('active');
+        }
+    </script>
+</body>
+</html>
