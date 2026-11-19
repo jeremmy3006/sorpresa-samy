@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Para Ti</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      background: #000;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* Pantalla inicial */
+    #startOverlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(50, 7, 20, 0.78) 0%, rgba(0, 0, 0, 0.97) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      z-index: 30;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+    #startOverlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    #startBtn {
+      background: linear-gradient(135deg, rgba(220, 32, 86, 0.32), rgba(255, 125, 180, 0.20));
+      color: #fff4f8;
+      border: 1.5px solid rgba(255, 155, 198, 0.8);
+      padding: 15px 36px;
+      font-size: 18px;
+      font-style: italic;
+      letter-spacing: 0.8px;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 0 26px rgba(235, 45, 105, 0.5), inset 0 0 14px rgba(255, 180, 210, 0.25);
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+    #startBtn:active {
+      transform: scale(0.97);
+    }
+    .start-hint {
+      font-size: 12px;
+      color: rgba(255, 215, 230, 0.6);
+      letter-spacing: 0.4px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    /* Etiqueta musical discreta sin nombre de canción */
+    #musicPill {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 15;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: rgba(24, 8, 15, 0.62);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 155, 198, 0.35);
+      border-radius: 999px;
+      padding: 6px 14px;
+      color: rgba(255, 236, 245, 0.9);
+      font-size: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    #musicPill.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .disc {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ff9ec7 0%, #c9184a 45%, #2b0712 100%);
+      border: 1px solid rgba(255, 220, 235, 0.6);
+      animation: spin 4s linear infinite;
+    }
+    .disc.paused {
+      animation-play-state: paused;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Botón para abrir la nota */
+    #noteBtn {
+      position: fixed;
+      top: 52px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 15;
+      background: rgba(255, 120, 175, 0.16);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #ffe6f0;
+      border: 1px solid rgba(255, 165, 205, 0.45);
+      border-radius: 999px;
+      padding: 6px 15px;
+      font-size: 12px;
+      font-style: italic;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease, transform 0.2s ease;
+    }
+    #noteBtn.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #noteBtn:active {
+      transform: translateX(-50%) scale(0.96);
+    }
+
+    /* Tarjeta de nota tímida y directa */
+    #noteModal {
+      position: fixed;
+      inset: 0;
+      z-index: 25;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+    #noteModal.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+    .note-card {
+      max-width: 335px;
+      width: 100%;
+      background: linear-gradient(160deg, rgba(38, 10, 22, 0.92), rgba(16, 4, 10, 0.95));
+      border: 1px solid rgba(255, 155, 198, 0.45);
+      border-radius: 18px;
+      padding: 24px 22px 20px;
+      color: #fff3f8;
+      text-align: center;
+      box-shadow: 0 12px 40px rgba(220, 30, 85, 0.35);
+      transform: translateY(10px) scale(0.97);
+      transition: transform 0.35s ease;
+    }
+    #noteModal.open .note-card {
+      transform: translateY(0) scale(1);
+    }
+    .note-title {
+      font-size: 15px;
+      color: #ff9ec7;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+    .note-body {
+      font-size: 15px;
+      line-height: 1.65;
+      font-style: italic;
+      color: rgba(255, 240, 246, 0.95);
+      margin-bottom: 18px;
+    }
+    #closeNoteBtn {
+      background: rgba(255, 130, 182, 0.22);
+      color: #fff;
+      border: 1px solid rgba(255, 165, 205, 0.5);
+      border-radius: 999px;
+      padding: 7px 22px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <!-- Pon el archivo MP3 en la misma carpeta como "secreto.mp3" si quieres que suene ese tema -->
+  <audio id="bgAudio" src="secreto.mp3" loop preload="auto"></audio>
+
+  <div id="startOverlay">
+    <button id="startBtn" type="button">Abrir para ti</button>
+    <div class="start-hint">Sube el volumen · Toca para comenzar</div>
+  </div>
+
+  <div id="musicPill" title="Toca para pausar o reanudar">
+    <span id="discIcon" class="disc"></span>
+    <span id="musicText">♪ Música de fondo</span>
+  </div>
+
+  <button id="noteBtn" type="button">Leer una nota 💌</button>
+
+  <div id="noteModal">
+    <div class="note-card">
+      <div class="note-title">Confesión chiquita 😊</div>
+      <p class="note-body">
+        “Me cuesta decir estas cosas de frente, así que lo hice así… la verdad es que me gusta mucho hablar contigo y me encanta cuando te ríes.”
+      </p>
+      <button id="closeNoteBtn" type="button">Volver</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const glowA = document.createElement("canvas");
+    const glowACtx = glowA.getContext("2d");
+    const glowB = document.createElement("canvas");
+    const glowBCtx = glowB.getContext("2d");
+
+    const FINAL_MESSAGE = "Hay cosas que también se pueden programar con el corazón.";
+    const HOPE_MESSAGE = "Espero te guste.";
+    const BASE_FOV = 820.0;
+    const BASE_CAM_DIST = 4.5;
+    const Y_CENTER = -0.18;
+
+    const COLOR_OUTER = [165, 10, 42];
+    const COLOR_MID   = [230, 28, 86];
+    const COLOR_INNER = [255, 125, 180];
+    const COLOR_CORE  = [255, 246, 252];
+    const COLOR_LEAF  = [48, 195, 92];
+    const COLOR_STEM  = [32, 145, 68];
+    const COLOR_SPARK = [255, 232, 242];
+    const TEXT_COLOR  = [255, 242, 248];
+
+    const OPEN_START = 0.9;
+    const OPEN_DUR = 2.6;
+
+    // Apertura media elegante
+    const LAYER_COUNT = [3, 4, 5, 6, 7];
+    const LAYER_RAD_CLOSED  = [0.08, 0.13, 0.19, 0.25, 0.31];
+    const LAYER_RAD_OPEN    = [0.15, 0.26, 0.40, 0.54, 0.68];
+    const LAYER_H_CLOSED    = [0.60, 0.68, 0.74, 0.77, 0.76];
+    const LAYER_H_OPEN      = [0.63, 0.71, 0.76, 0.77, 0.74];
+    const LAYER_TIP_CLOSED  = [0.01, 0.02, 0.03, 0.04, 0.05];
+    const LAYER_TIP_OPEN    = [0.02, 0.05, 0.08, 0.11, 0.14];
+    const LAYER_OPEN_DELAY  = [0.00, 0.20, 0.42, 0.66, 0.92];
+    const LAYER_OPEN_SPAN   = [1.35, 1.45, 1.55, 1.65, 1.75];
+
+    const STEM_TOP_Y = 0.18;
+    const STEM_BOT_Y = -1.65;
+
+    const LEAVES = [
+      { y: -0.22, dir:  1, yaw: -0.22, len: 0.64, wid: 0.24, tilt: 0.16 },
+      { y: -0.42, dir: -1, yaw:  0.25, len: 0.68, wid: 0.25, tilt: 0.12 },
+      { y: -0.76, dir:  1, yaw:  0.18, len: 0.74, wid: 0.27, tilt: 0.08 },
+      { y: -0.96, dir: -1, yaw: -0.20, len: 0.78, wid: 0.28, tilt: 0.04 },
+    ];
+
+    const WORDS_PETAL = ["love", "grow", "life", "hope", "rose", "bloom", "heart", "dream", "beauty"];
+    const WORDS_LEAF  = ["bloom", "grow", "hope", "life", "nature", "green", "stem"];
+
+    const KIND_STEM = 0;
+    const KIND_LEAF = 1;
+    const KIND_PETAL = 2;
+    const KIND_CENTER = 3;
+
+    const musicEngine = (() => {
+      const bgAudio = document.getElementById("bgAudio");
+      let audioCtx = null;
+      let masterGain = null;
+      let timerId = null;
+      let usingFallback = false;
+      let playing = false;
+      let muted = false;
+      let step = 0;
+
+      const notes = [
+        329.63, 392.00, 440.00, 523.25, 493.88, 440.00,
+        349.23, 440.00, 523.25, 587.33, 523.25, 440.00,
+        261.63, 329.63, 392.00, 493.88, 440.00, 392.00,
+        293.66, 392.00, 493.88, 587.33, 493.88, 392.00,
+      ];
+
+      function playSoftNote(freq, duration = 1.9, peak = 0.05) {
+        if (!audioCtx || muted || !playing) return;
+        const now = audioCtx.currentTime;
+
+        const osc = audioCtx.createOscillator();
+        const overtone = audioCtx.createOscillator();
+        const env = audioCtx.createGain();
+        const overGain = audioCtx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, now);
+
+        overtone.type = "triangle";
+        overtone.frequency.setValueAtTime(freq * 2, now);
+        overGain.gain.setValueAtTime(0.16, now);
+
+        env.gain.setValueAtTime(0.0001, now);
+        env.gain.linearRampToValueAtTime(peak, now + 0.08);
+        env.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+        osc.connect(env);
+        overtone.connect(overGain);
+        overGain.connect(env);
+        env.connect(masterGain);
+
+        osc.start(now);
+        overtone.start(now);
+        osc.stop(now + duration + 0.05);
+        overtone.stop(now + duration + 0.05);
+      }
+
+      function startFallbackSynth() {
+        usingFallback = true;
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          audioCtx = new AudioContextClass();
+
+          masterGain = audioCtx.createGain();
+          masterGain.gain.setValueAtTime(0.85, audioCtx.currentTime);
+
+          const delay = audioCtx.createDelay(1.0);
+          delay.delayTime.setValueAtTime(0.32, audioCtx.currentTime);
+          const feedback = audioCtx.createGain();
+          feedback.gain.setValueAtTime(0.24, audioCtx.currentTime);
+          const wetGain = audioCtx.createGain();
+          wetGain.gain.setValueAtTime(0.26, audioCtx.currentTime);
+
+          masterGain.connect(audioCtx.destination);
+          masterGain.connect(delay);
+          delay.connect(feedback);
+          feedback.connect(delay);
+          delay.connect(wetGain);
+          wetGain.connect(audioCtx.destination);
+        }
+
+        if (audioCtx.state === "suspended") {
+          audioCtx.resume();
+        }
+
+        if (timerId) clearInterval(timerId);
+        playSoftNote(notes[0], 2.1, 0.055);
+        step = 1;
+
+        timerId = setInterval(() => {
+          if (!playing || muted) return;
+          const freq = notes[step % notes.length];
+          const isAccent = step % 6 === 0;
+          playSoftNote(freq, isAccent ? 2.4 : 1.6, isAccent ? 0.06 : 0.04);
+          step++;
+        }, 540);
+      }
+
+      function start() {
+        playing = true;
+        muted = false;
+        bgAudio.volume = 0.85;
+        const playPromise = bgAudio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            startFallbackSynth();
+          });
+        }
+      }
+
+      function toggleMute() {
+        muted = !muted;
+        if (usingFallback) {
+          if (!muted && audioCtx && audioCtx.state === "suspended") {
+            audioCtx.resume();
+          }
+        } else {
+          if (muted) bgAudio.pause();
+          else bgAudio.play().catch(() => {});
+        }
+        return !muted;
+      }
+
+      return { start, toggleMute };
+    })();
+
+    function clamp01(x) {
+      return Math.max(0, Math.min(1, x));
+    }
+
+    function smoothstep(a, b, x) {
+      const t = clamp01((x - a) / Math.max(1e-6, b - a));
+      return t * t * (3.0 - 2.0 * t);
+    }
+
+    function stemProfile(t) {
+      const y = STEM_BOT_Y + (STEM_TOP_Y - STEM_BOT_Y) * t;
+      const x = 0.05 * Math.sin(t * Math.PI * 1.1);
+      const z = 0.025 * Math.sin(t * Math.PI * 0.9);
+      return { x, y, z };
+    }
+
+    function buildSinglePetalPoint(u, v, petalWidth, petalHeight, curlAmount, openK) {
+      const vv = clamp01(v);
+      const clampedU = Math.max(-1, Math.min(1, u));
+
+      const silhouetteWidth = Math.pow(vv, 0.58) * Math.sin(Math.PI * (0.12 + 0.76 * vv));
+      const halfW = petalWidth * 0.54 * silhouetteWidth;
+      const px = clampedU * halfW;
+
+      const notch = -0.024 * Math.exp(-Math.pow(clampedU * 2.8, 2)) * Math.pow(vv, 2.2);
+      const sideLift = 0.030 * Math.pow(Math.abs(clampedU), 1.8) * vv;
+      const py = petalHeight * Math.pow(vv, 0.84) + notch + sideLift;
+
+      const cupZ = -0.14 * (1.0 - clampedU * clampedU) * Math.sin(Math.PI * vv) * (1.22 - 0.25 * openK);
+      const tipBendZ = curlAmount * Math.pow(Math.max(0.0, vv - 0.72) / 0.28, 1.8);
+      const pz = cupZ + tipBendZ;
+
+      return { px, py, pz };
+    }
+
+    function placePetalInRose(u, v, th, rad, h, tipTilt, openK, petalSpan, layerOffsetRad, thicknessOffset) {
+      const vv = clamp01(v);
+      const petalWidth = (rad + 0.14) * petalSpan * 1.72;
+      const { px, py, pz } = buildSinglePetalPoint(u, vv, petalWidth, h, tipTilt, openK);
+
+      const openCurve = Math.pow(vv, 1.14);
+      const radialSpread = (0.18 + 0.56 * openK) * openCurve;
+
+      const baseOriginRadius = layerOffsetRad * Math.pow(vv, 0.65);
+      const rFromAxis = baseOriginRadius + rad * radialSpread + (pz + thicknessOffset * vv) * 0.62;
+      const yFromAxis = STEM_TOP_Y + py - pz * (0.24 + 0.22 * openK) * vv;
+
+      const perpAngle = th + Math.PI * 0.5;
+      const x = rFromAxis * Math.cos(th) + px * Math.cos(perpAngle);
+      const z = rFromAxis * Math.sin(th) + px * Math.sin(perpAngle);
+
+      return { x, y: yFromAxis, z };
+    }
+
+    function makeRamp(base, steps = 16) {
+      const ramp = [];
+      for (let i = 0; i < steps; i++) {
+        const k = i / Math.max(1, steps - 1);
+        const f = 0.28 + 0.85 * Math.pow(k, 0.82);
+        ramp.push([
+          Math.min(255, Math.round(base[0] * f)),
+          Math.min(255, Math.round(base[1] * f)),
+          Math.min(255, Math.round(base[2] * f)),
+        ]);
+      }
+      return ramp;
+    }
+
+    const RAMPS = [
+      makeRamp(COLOR_OUTER), // 0
+      makeRamp(COLOR_MID),   // 1
+      makeRamp(COLOR_INNER), // 2
+      makeRamp(COLOR_CORE),  // 3
+      makeRamp(COLOR_LEAF),  // 4
+      makeRamp(COLOR_STEM),  // 5
+    ];
+
+    function pickChoice(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function randRange(a, b) {
+      return a + Math.random() * (b - a);
+    }
+
+    function randNormal(mean = 0, std = 1) {
+      const u1 = Math.max(1e-7, Math.random());
+      const u2 = Math.random();
+      const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+      return mean + z0 * std;
+    }
+
+    const particles = [];
+    const sparkles = [];
+    const shootingStars = [];
+    const tapBursts = [];
+
+    function spawnShootingStar() {
+      const fromLeft = Math.random() < 0.7;
+      const startX = fromLeft ? randRange(-0.1 * width, 0.45 * width) : randRange(0.55 * width, 1.1 * width);
+      const startY = randRange(0.04 * height, 0.34 * height);
+      const speed = randRange(520, 820);
+      const angle = fromLeft ? randRange(0.32, 0.56) : Math.PI - randRange(0.32, 0.56);
+      shootingStars.push({
+        x: startX,
+        y: startY,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 0,
+        maxLife: randRange(0.65, 1.05),
+        length: randRange(95, 165),
+      });
+    }
+
+    function spawnTapSparkles(x, y) {
+      for (let i = 0; i < 14; i++) {
+        const ang = randRange(0, Math.PI * 2);
+        const spd = randRange(25, 110);
+        tapBursts.push({
+          x,
+          y,
+          vx: Math.cos(ang) * spd,
+          vy: Math.sin(ang) * spd - 20,
+          age: 0,
+          life: randRange(0.55, 0.95),
+          size: randRange(1.4, 2.8),
+        });
+      }
+    }
+
+    function buildWorld() {
+      particles.length = 0;
+      sparkles.length = 0;
+      shootingStars.length = 0;
+      tapBursts.length = 0;
+
+      function addPt(kind, x, y, z, rDot, pal, shade, extra = {}) {
+        particles.push({
+          kind,
+          x, y, z,
+          rDot,
+          pal,
+          shade,
+          word: extra.word ?? null,
+          layer: extra.layer ?? 0,
+          u: extra.u ?? 0,
+          v: extra.v ?? 0,
+          th: extra.th ?? 0,
+          petalSpan: extra.petalSpan ?? 0.5,
+          layerOffsetRad: extra.layerOffsetRad ?? 0,
+          thicknessOffset: extra.thicknessOffset ?? 0,
+          sx: randNormal(0, 1.15),
+          sy: randNormal(0.0, 0.95),
+          sz: randNormal(0, 1.15),
+          appear: Math.max(0, Math.min(1.0, randNormal(0.22, 0.16))),
+          dur: randRange(0.60, 1.05),
+          ph: randRange(0, Math.PI * 2),
+          amp: randRange(0.002, 0.007),
+        });
+      }
+
+      const nStem = 920;
+      for (let i = 0; i < nStem; i++) {
+        const t = i / (nStem - 1);
+        const st = stemProfile(t);
+        const ang = randRange(0, Math.PI * 2);
+        const calyxFlare = t > 0.90 ? 1.0 + 2.4 * ((t - 0.90) / 0.10) : 1.0;
+        const rad = 0.022 * calyxFlare * Math.sqrt(Math.random());
+        const shade = Math.min(15, Math.max(3, Math.floor(5 + 10 * t + randNormal(0, 1.3))));
+        addPt(
+          KIND_STEM,
+          st.x + rad * Math.cos(ang),
+          st.y + randNormal(0, 0.004),
+          st.z + rad * Math.sin(ang),
+          randRange(1.2, 1.8),
+          5,
+          shade
+        );
+      }
+
+      for (const lf of LEAVES) {
+        const tStem = clamp01((lf.y - STEM_BOT_Y) / (STEM_TOP_Y - STEM_BOT_Y));
+        const st = stemProfile(tStem);
+
+        for (let k = 0; k < 35; k++) {
+          const f = k / 34;
+          addPt(
+            KIND_LEAF,
+            st.x + lf.dir * 0.10 * f,
+            st.y + 0.03 * f,
+            st.z + 0.015 * Math.sin(f * Math.PI),
+            1.3,
+            4,
+            10
+          );
+        }
+
+        const nLeaf = 480;
+        for (let i = 0; i < nLeaf; i++) {
+          const u = Math.pow(Math.random(), 0.78);
+          let s = randRange(-1, 1);
+          if (i % 3 === 0) {
+            s = (i % 6 === 0 ? -1 : 1) * randRange(0.82, 1.0);
+          } else if (i % 8 === 0) {
+            s = randNormal(0, 0.12);
+          }
+
+          const contour = Math.sin(Math.PI * Math.pow(u, 0.82)) * (1.0 - 0.15 * u);
+          const lx = lf.dir * (0.09 + lf.len * u);
+          const ly = lf.tilt * u - 0.11 * u * u + 0.02 * Math.abs(s) * contour;
+          const lz = s * lf.wid * contour;
+
+          const rx = lx * Math.cos(lf.yaw) - lz * Math.sin(lf.yaw);
+          const rz = lx * Math.sin(lf.yaw) + lz * Math.cos(lf.yaw);
+
+          const isEdge = Math.abs(s) > 0.82 || Math.abs(s) < 0.10;
+          const shade = Math.min(15, Math.max(4, Math.floor(5 + 8 * u + (isEdge ? 4 : 0))));
+          const word = (isEdge && i % 42 === 0) ? pickChoice(WORDS_LEAF) : null;
+
+          addPt(
+            KIND_LEAF,
+            st.x + rx,
+            st.y + ly,
+            st.z + rz,
+            isEdge ? 1.65 : 1.15,
+            4,
+            shade,
+            { word }
+          );
+        }
+      }
+
+      for (let layer = 0; layer < LAYER_COUNT.length; layer++) {
+        const count = LAYER_COUNT[layer];
+        const ptsPerPetal = 420;
+        const petalSpan = (Math.PI / count) * 1.55;
+        const layerAngleOffset = (layer % 2 === 0 ? 0.5 : 0.0) * ((2 * Math.PI) / count) + layer * 0.28;
+        const layerOffsetRad = 0.015 * layer;
+
+        let pal = 0;
+        if (layer === 0) pal = 3;
+        else if (layer === 1) pal = 2;
+        else if (layer <= 3) pal = 1;
+        else pal = 0;
+
+        for (let p = 0; p < count; p++) {
+          const th = (p / count) * Math.PI * 2 + layerAngleOffset;
+
+          for (let j = 0; j < ptsPerPetal; j++) {
+            let u;
+            let v;
+
+            if (j < 130) {
+              if (j < 70) {
+                u = -1.0 + 2.0 * (j / 69);
+                v = 0.90 + 0.10 * Math.sqrt(Math.max(0, 1.0 - u * u)) + randNormal(0, 0.015);
+              } else {
+                const side = j % 2 === 0 ? -1 : 1;
+                v = (j - 70) / 60;
+                u = side * randRange(0.84, 1.0);
+              }
+              v = clamp01(v);
+            } else {
+              u = randRange(-1.0, 1.0);
+              v = Math.pow(Math.random(), 0.70);
+            }
+
+            const thicknessOffset = randNormal(0, 0.020);
+
+            const init = placePetalInRose(
+              u, v, th,
+              LAYER_RAD_CLOSED[layer],
+              LAYER_H_CLOSED[layer],
+              LAYER_TIP_CLOSED[layer],
+              0.0,
+              petalSpan,
+              layerOffsetRad,
+              thicknessOffset
+            );
+
+            const isBorder = j < 130;
+            const shade = Math.min(15, Math.max(3, Math.floor(4 + 9 * v + (isBorder ? 4 : 0))));
+            const word = (j === 35 && layer >= 1) ? pickChoice(WORDS_PETAL) : null;
+
+            addPt(
+              KIND_PETAL,
+              init.x, init.y, init.z,
+              isBorder ? 1.95 : 1.40,
+              pal,
+              shade,
+              { layer, u, v, th, petalSpan, layerOffsetRad, thicknessOffset, word }
+            );
+          }
+        }
+      }
+
+      for (let i = 0; i < 340; i++) {
+        const ang = randRange(0, Math.PI * 2);
+        const r = 0.13 * Math.sqrt(Math.random());
+        const yOff = 0.44 + 0.14 * (1.0 - r / 0.13) + randNormal(0, 0.03);
+        addPt(
+          KIND_CENTER,
+          r * Math.cos(ang),
+          STEM_TOP_Y + yOff,
+          r * Math.sin(ang),
+          randRange(1.5, 2.3),
+          3,
+          15
+        );
+      }
+
+      for (let i = 0; i < 65; i++) {
+        sparkles.push({
+          x: randRange(-2.1, 2.1),
+          y: randRange(-1.8, 1.6),
+          z: randRange(-1.5, 1.5),
+          vx: randRange(-0.02, 0.02),
+          vy: randRange(0.015, 0.06),
+          vz: randRange(-0.02, 0.02),
+          age: randRange(0, 3.0),
+          life: randRange(2.5, 5.0),
+          r: randRange(1.0, 1.6),
+        });
+      }
+    }
+
+    let width = 0;
+    let height = 0;
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      glowA.width = Math.max(1, Math.floor(width / 3));
+      glowA.height = Math.max(1, Math.floor(height / 3));
+      glowB.width = Math.max(1, Math.floor(width / 6));
+      glowB.height = Math.max(1, Math.floor(height / 6));
+    }
+
+    window.addEventListener("resize", resize);
+    resize();
+    buildWorld();
+
+    let t = 0;
+    let started = false;
+    let paused = false;
+    let nextStarTimer = 1.6;
+
+    let userYaw = 0;
+    let userPitch = 0;
+    let velYaw = 0;
+    let velPitch = 0;
+    let userZoom = 1.0;
+    let isDragging = false;
+    let lastX = 0;
+    let lastY = 0;
+    let lastPinchDist = 0;
+    let lastTapTime = 0;
+
+    const startOverlay = document.getElementById("startOverlay");
+    const startBtn = document.getElementById("startBtn");
+    const musicPill = document.getElementById("musicPill");
+    const discIcon = document.getElementById("discIcon");
+    const noteBtn = document.getElementById("noteBtn");
+    const noteModal = document.getElementById("noteModal");
+    const closeNoteBtn = document.getElementById("closeNoteBtn");
+
+    function beginExperience() {
+      t = 0;
+      started = true;
+      userYaw = 0;
+      userPitch = 0;
+      velYaw = 0;
+      velPitch = 0;
+      userZoom = 1.0;
+      nextStarTimer = 1.4;
+      buildWorld();
+      startOverlay.classList.add("hidden");
+      musicPill.classList.add("visible");
+      noteBtn.classList.add("visible");
+      musicEngine.start();
+    }
+
+    startBtn.addEventListener("click", beginExperience);
+
+    musicPill.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOn = musicEngine.toggleMute();
+      discIcon.classList.toggle("paused", !isOn);
+    });
+
+    noteBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      noteModal.classList.add("open");
+    });
+
+    closeNoteBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      noteModal.classList.remove("open");
+    });
+
+    noteModal.addEventListener("click", (e) => {
+      if (e.target === noteModal) {
+        noteModal.classList.remove("open");
+      }
+    });
+
+    function resetAnimation() {
+      t = 0;
+      userYaw = 0;
+      userPitch = 0;
+      velYaw = 0;
+      velPitch = 0;
+      userZoom = 1.0;
+      buildWorld();
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (!started) return;
+      if (e.code === "Space") paused = !paused;
+      if (e.key === "r" || e.key === "R") resetAnimation();
+    });
+
+    canvas.addEventListener("touchstart", (e) => {
+      if (!started) return;
+      e.preventDefault();
+      if (e.touches.length === 1) {
+        const tx = e.touches[0].clientX;
+        const ty = e.touches[0].clientY;
+        spawnTapSparkles(tx, ty);
+
+        const now = performance.now();
+        if (now - lastTapTime < 280) {
+          resetAnimation();
+          lastTapTime = 0;
+          return;
+        }
+        lastTapTime = now;
+
+        isDragging = true;
+        velYaw = 0;
+        velPitch = 0;
+        lastX = tx;
+        lastY = ty;
+      } else if (e.touches.length === 2) {
+        isDragging = false;
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        lastPinchDist = Math.hypot(dx, dy);
+      }
+    }, { passive: false });
+
+    canvas.addEventListener("touchmove", (e) => {
+      if (!started) return;
+      e.preventDefault();
+      if (e.touches.length === 1 && isDragging) {
+        const x = e.touches[0].clientX;
+        const y = e.touches[0].clientY;
+        const dx = x - lastX;
+        const dy = y - lastY;
+        lastX = x;
+        lastY = y;
+
+        const dYaw = dx * 0.009;
+        const dPitch = dy * 0.008;
+        userYaw += dYaw;
+        userPitch = Math.max(-1.15, Math.min(1.15, userPitch + dPitch));
+        velYaw = dYaw * 0.7;
+        velPitch = dPitch * 0.7;
+      } else if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.hypot(dx, dy);
+        if (lastPinchDist > 0) {
+          const factor = dist / lastPinchDist;
+          userZoom = Math.max(0.55, Math.min(2.4, userZoom * factor));
+        }
+        lastPinchDist = dist;
+      }
+    }, { passive: false });
+
+    canvas.addEventListener("touchend", (e) => {
+      if (!started) return;
+      if (e.touches.length === 0) {
+        isDragging = false;
+        lastPinchDist = 0;
+      } else if (e.touches.length === 1) {
+        isDragging = true;
+        lastX = e.touches[0].clientX;
+        lastY = e.touches[0].clientY;
+        lastPinchDist = 0;
+      }
+    });
+
+    canvas.addEventListener("mousedown", (e) => {
+      if (!started) return;
+      spawnTapSparkles(e.clientX, e.clientY);
+      isDragging = true;
+      velYaw = 0;
+      velPitch = 0;
+      lastX = e.clientX;
+      lastY = e.clientY;
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!started || !isDragging) return;
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+      lastX = e.clientX;
+      lastY = e.clientY;
+
+      const dYaw = dx * 0.008;
+      const dPitch = dy * 0.007;
+      userYaw += dYaw;
+      userPitch = Math.max(-1.15, Math.min(1.15, userPitch + dPitch));
+      velYaw = dYaw * 0.7;
+      velPitch = dPitch * 0.7;
+    });
+
+    window.addEventListener("mouseup", () => {
+      isDragging = false;
+    });
+
+    canvas.addEventListener("wheel", (e) => {
+      if (!started) return;
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 1.08 : 0.92;
+      userZoom = Math.max(0.55, Math.min(2.4, userZoom * factor));
+    }, { passive: false });
+
+    function project(x, y, z, yaw, pitch, fovScaled) {
+      const cy = Math.cos(yaw);
+      const sy = Math.sin(yaw);
+      const rx = x * cy + z * sy;
+      const rz1 = -x * sy + z * cy;
+
+      const cp = Math.cos(pitch);
+      const sp = Math.sin(pitch);
+      const dy = y - Y_CENTER;
+      const ry = dy * cp - rz1 * sp;
+      const rz = dy * sp + rz1 * cp;
+
+      const depth = Math.max(0.25, BASE_CAM_DIST - rz);
+      const scale = fovScaled / depth;
+      return {
+        sx: width * 0.5 + rx * scale,
+        sy: height * 0.50 - ry * scale,
+        rz,
+        scale,
+      };
+    }
+
+    let prev = performance.now();
+
+    function render(now) {
+      const dt = Math.min(0.05, (now - prev) / 1000);
+      prev = now;
+
+      if (started && !paused) {
+        t += dt;
+
+        nextStarTimer -= dt;
+        if (nextStarTimer <= 0) {
+          spawnShootingStar();
+          nextStarTimer = randRange(3.2, 6.0);
+        }
+
+        for (let i = shootingStars.length - 1; i >= 0; i--) {
+          const st = shootingStars[i];
+          st.life += dt;
+          st.x += st.vx * dt;
+          st.y += st.vy * dt;
+          if (st.life >= st.maxLife) {
+            shootingStars.splice(i, 1);
+          }
+        }
+
+        for (let i = tapBursts.length - 1; i >= 0; i--) {
+          const tb = tapBursts[i];
+          tb.age += dt;
+          tb.x += tb.vx * dt;
+          tb.y += tb.vy * dt;
+          tb.vy += 45 * dt;
+          if (tb.age >= tb.life) {
+            tapBursts.splice(i, 1);
+          }
+        }
+
+        for (const sp of sparkles) {
+          sp.age += dt;
+          sp.x += sp.vx * dt;
+          sp.y += sp.vy * dt;
+          sp.z += sp.vz * dt;
+          if (sp.age >= sp.life || sp.y > 1.7) {
+            sp.age = 0;
+            sp.x = randRange(-2.0, 2.0);
+            sp.y = randRange(-1.7, 1.3);
+            sp.z = randRange(-1.4, 1.4);
+          }
+        }
+      }
+
+      if (!isDragging) {
+        userYaw += velYaw;
+        userPitch = Math.max(-1.15, Math.min(1.15, userPitch + velPitch));
+        velYaw *= 0.92;
+        velPitch *= 0.92;
+      }
+
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(0, 0, width, height);
+
+      if (started) {
+        for (const st of shootingStars) {
+          const progress = clamp01(st.life / st.maxLife);
+          const alpha = Math.sin(Math.PI * progress) * 0.95;
+          const mag = Math.hypot(st.vx, st.vy) || 1;
+          const nx = st.vx / mag;
+          const ny = st.vy / mag;
+          const tailX = st.x - nx * st.length;
+          const tailY = st.y - ny * st.length;
+
+          const grad = ctx.createLinearGradient(st.x, st.y, tailX, tailY);
+          grad.addColorStop(0, `rgba(255, 248, 252, ${alpha.toFixed(2)})`);
+          grad.addColorStop(0.35, `rgba(255, 185, 218, ${(alpha * 0.6).toFixed(2)})`);
+          grad.addColorStop(1, "rgba(255, 120, 175, 0)");
+
+          ctx.save();
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = 2.2;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(st.x, st.y);
+          ctx.lineTo(tailX, tailY);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.arc(st.x, st.y, 2.4, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${alpha.toFixed(2)})`;
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      const responsiveScale = Math.min(1.0, width / 520);
+      const fovScaled = BASE_FOV * responsiveScale * userZoom;
+
+      const openGlobal = smoothstep(OPEN_START, OPEN_START + OPEN_DUR, t);
+      const yaw = 0.25 + (started ? t * 0.22 : 0) + userYaw;
+      const pitch = Math.max(-1.25, Math.min(1.35, 0.08 + 0.16 * openGlobal + userPitch));
+
+      const leanAngle = 0.14 + 0.20 * openGlobal + 0.035 * Math.sin(t * 0.9);
+      const cosL = Math.cos(leanAngle);
+      const sinL = Math.sin(leanAngle);
+
+      const drawList = [];
+
+      for (const p of particles) {
+        let tx = p.x;
+        let ty = p.y;
+        let tz = p.z;
+        let openK = 0;
+
+        if (p.kind === KIND_PETAL) {
+          const lStart = OPEN_START + LAYER_OPEN_DELAY[p.layer];
+          openK = smoothstep(lStart, lStart + LAYER_OPEN_SPAN[p.layer], t);
+
+          const rad = LAYER_RAD_CLOSED[p.layer] + (LAYER_RAD_OPEN[p.layer] - LAYER_RAD_CLOSED[p.layer]) * openK;
+          const h = LAYER_H_CLOSED[p.layer] + (LAYER_H_OPEN[p.layer] - LAYER_H_CLOSED[p.layer]) * openK;
+          const tipTilt = LAYER_TIP_CLOSED[p.layer] + (LAYER_TIP_OPEN[p.layer] - LAYER_TIP_CLOSED[p.layer]) * openK;
+
+          const pos = placePetalInRose(
+            p.u, p.v, p.th, rad, h, tipTilt, openK,
+            p.petalSpan, p.layerOffsetRad, p.thicknessOffset
+          );
+          tx = pos.x;
+          ty = pos.y;
+          tz = pos.z;
+        }
+
+        if (p.kind === KIND_PETAL || p.kind === KIND_CENTER) {
+          const dyPivot = ty - STEM_TOP_Y;
+          const rotY = dyPivot * cosL - tz * sinL;
+          const rotZ = dyPivot * sinL + tz * cosL;
+          ty = STEM_TOP_Y + rotY;
+          tz = rotZ;
+        }
+
+        const form = started ? smoothstep(p.appear, p.appear + p.dur, t) : 0;
+        if (form <= 0.01) continue;
+
+        const swirl = (1.0 - form) * 0.95;
+        const cs = Math.cos(swirl);
+        const sn = Math.sin(swirl);
+        const ix = p.sx * cs - p.sz * sn;
+        const iz = p.sx * sn + p.sz * cs;
+
+        const x = ix + (tx - ix) * form;
+        const y = p.sy + (ty - p.sy) * form + p.amp * Math.sin(t * 1.8 + p.ph) * form;
+        const z = iz + (tz - iz) * form;
+
+        const proj = project(x, y, z, yaw, pitch, fovScaled);
+        if (proj.sx < -25 || proj.sx > width + 25 || proj.sy < -25 || proj.sy > height + 25) continue;
+
+        let shadeIdx = p.shade;
+        if (p.kind === KIND_PETAL && p.layer <= 2) {
+          shadeIdx = Math.min(15, Math.round(shadeIdx + 3 * openK * (1.0 - p.v * 0.45)));
+        }
+        const rgb = RAMPS[p.pal][shadeIdx];
+        const radius = Math.max(0.95, p.rDot * (proj.scale / 210));
+
+        drawList.push({
+          rz: proj.rz,
+          sx: proj.sx,
+          sy: proj.sy,
+          radius,
+          word: p.word,
+          alpha: form * 0.92,
+          rgb,
+        });
+      }
+
+      drawList.sort((a, b) => a.rz - b.rz);
+
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      for (const item of drawList) {
+        const [r, g, b] = item.rgb;
+        ctx.beginPath();
+        ctx.arc(item.sx, item.sy, item.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${r},${g},${b},${item.alpha.toFixed(2)})`;
+        ctx.fill();
+
+        if (item.word) {
+          ctx.font = `10px Consolas, "Courier New", monospace`;
+          ctx.fillStyle = `rgba(${Math.min(255, r + 55)},${Math.min(255, g + 55)},${Math.min(255, b + 55)},${(item.alpha * 0.85).toFixed(2)})`;
+          ctx.fillText(item.word, item.sx, item.sy);
+        }
+      }
+
+      if (started) {
+        for (const sp of sparkles) {
+          const proj = project(sp.x, sp.y, sp.z, yaw, pitch, fovScaled);
+          const a = Math.sin(Math.PI * clamp01(sp.age / sp.life)) * 0.72;
+          if (a <= 0.03) continue;
+          ctx.beginPath();
+          ctx.arc(proj.sx, proj.sy, Math.max(0.9, sp.r * (proj.scale / 220)), 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${COLOR_SPARK[0]},${COLOR_SPARK[1]},${COLOR_SPARK[2]},${a.toFixed(2)})`;
+          ctx.fill();
+        }
+
+        for (const tb of tapBursts) {
+          const a = 1.0 - clamp01(tb.age / tb.life);
+          ctx.beginPath();
+          ctx.arc(tb.x, tb.y, tb.size * a, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 190, 220, ${(a * 0.9).toFixed(2)})`;
+          ctx.fill();
+        }
+      }
+
+      glowACtx.clearRect(0, 0, glowA.width, glowA.height);
+      glowACtx.drawImage(canvas, 0, 0, glowA.width, glowA.height);
+      glowBCtx.clearRect(0, 0, glowB.width, glowB.height);
+      glowBCtx.drawImage(canvas, 0, 0, glowB.width, glowB.height);
+
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      ctx.filter = "blur(6px)";
+      ctx.globalAlpha = 0.42;
+      ctx.drawImage(glowA, 0, 0, width, height);
+      ctx.filter = "blur(14px)";
+      ctx.globalAlpha = 0.30;
+      ctx.drawImage(glowB, 0, 0, width, height);
+      ctx.restore();
+
+      const textAlpha = started ? smoothstep(2.6, 3.8, t) : 0;
+      const hopeAlpha = started ? smoothstep(4.0, 5.2, t) : 0;
+
+      if (textAlpha > 0.01 || hopeAlpha > 0.01) {
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        if (textAlpha > 0.01) {
+          ctx.font = `italic ${Math.max(14, Math.min(21, Math.round(width * 0.034)))}px Georgia, "Times New Roman", serif`;
+          ctx.fillStyle = `rgba(${TEXT_COLOR[0]},${TEXT_COLOR[1]},${TEXT_COLOR[2]},${textAlpha.toFixed(2)})`;
+          ctx.shadowColor = "rgba(255, 115, 170, 0.8)";
+          ctx.shadowBlur = 12;
+          ctx.fillText(FINAL_MESSAGE, width * 0.5, height * 0.87);
+        }
+
+        if (hopeAlpha > 0.01) {
+          ctx.font = `italic ${Math.max(15, Math.min(23, Math.round(width * 0.038)))}px Georgia, "Times New Roman", serif`;
+          ctx.fillStyle = `rgba(255, 224, 238, ${hopeAlpha.toFixed(2)})`;
+          ctx.shadowColor = "rgba(255, 140, 190, 0.9)";
+          ctx.shadowBlur = 14;
+          ctx.fillText(HOPE_MESSAGE, width * 0.5, height * 0.925);
+        }
+
+        ctx.restore();
+      }
+
+      requestAnimationFrame(render);
+    }
+
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>
