@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Galaxia y Corazón Azul 3D · Sorpresa de Noche 🌌💙</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #03050e;
+      font-family: Georgia, "Times New Roman", serif;
+      color: #ffffff;
+      touch-action: none;
+    }
+
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #topHint {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      background: rgba(10, 22, 48, 0.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(125, 211, 252, 0.45);
+      border-radius: 999px;
+      padding: 7px 16px;
+      color: #e0f2fe;
+      font-size: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    #musicPill {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(10, 22, 48, 0.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      border-radius: 999px;
+      padding: 6px 12px;
+      color: #e0f2fe;
+      font-size: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      cursor: pointer;
+    }
+
+    .disc {
+      display: inline-block;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #7dd3fc 0%, #2563eb 58%, #1e1b4b 100%);
+      border: 1px solid rgba(224, 242, 254, 0.7);
+      animation: spin 4s linear infinite;
+    }
+
+    .disc.paused {
+      animation-play-state: paused;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    #hudCard {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      width: min(92vw, 382px);
+      background: linear-gradient(155deg, rgba(13, 28, 58, 0.92), rgba(5, 10, 24, 0.96));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1.5px solid rgba(125, 211, 252, 0.65);
+      border-radius: 20px;
+      padding: 13px 16px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.28);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.55s ease;
+    }
+
+    #hudCard.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .hud-kicker {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #7dd3fc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin-bottom: 4px;
+    }
+
+    .hud-msg {
+      font-size: 14px;
+      font-style: italic;
+      color: #f0f9ff;
+      margin-bottom: 9px;
+      line-height: 1.4;
+    }
+
+    .bar-bg {
+      width: 100%;
+      height: 7px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2563eb 0%, #38bdf8 55%, #bae6fd 100%);
+      border-radius: 999px;
+      transition: width 0.28s ease;
+    }
+
+    .hud-sub {
+      font-size: 11.5px;
+      color: rgba(224, 242, 254, 0.85);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    #openNoteBtn {
+      display: none;
+      margin-top: 8px;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.42), rgba(56, 189, 248, 0.28));
+      color: #f0f9ff;
+      border: 1px solid rgba(125, 211, 252, 0.82);
+      border-radius: 999px;
+      padding: 7px 18px;
+      font-size: 12.5px;
+      font-style: italic;
+      cursor: pointer;
+    }
+
+    #noteModal {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      background: rgba(3, 6, 18, 0.74);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 22px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+
+    #noteModal.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .note-box {
+      max-width: 374px;
+      width: 100%;
+      background: linear-gradient(160deg, rgba(13, 28, 58, 0.97), rgba(5, 10, 24, 0.99));
+      border: 1.5px solid rgba(125, 211, 252, 0.65);
+      border-radius: 22px;
+      padding: 26px 22px 22px;
+      color: #f0f9ff;
+      text-align: center;
+      box-shadow: 0 18px 50px rgba(37, 99, 235, 0.36);
+      transform: translateY(14px) scale(0.96);
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    #noteModal.open .note-box {
+      transform: translateY(0) scale(1);
+    }
+
+    .note-tag {
+      font-size: 11.5px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #7dd3fc;
+      margin-bottom: 10px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .note-title {
+      font-size: 19px;
+      font-style: italic;
+      color: #bae6fd;
+      margin-bottom: 14px;
+    }
+
+    .note-body {
+      font-size: 14.5px;
+      line-height: 1.76;
+      font-style: italic;
+      color: rgba(240, 249, 255, 0.97);
+      margin-bottom: 18px;
+    }
+
+    #closeNoteBtn {
+      background: rgba(125, 211, 252, 0.22);
+      color: #ffffff;
+      border: 1px solid rgba(125, 211, 252, 0.65);
+      border-radius: 999px;
+      padding: 8px 24px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="canvas"></canvas>
+
+  <div id="topHint">🌌 Da toques o clicks para que la galaxia forme el corazón azul 3D</div>
+
+  <div id="musicPill" title="Toca para pausar o reanudar">
+    <span id="discIcon" class="disc"></span>
+    <span>♪ Melodía</span>
+  </div>
+
+  <div id="hudCard">
+    <div class="hud-kicker">🌌 Galaxia & Corazón Azul 3D · Noche</div>
+    <div class="hud-msg" id="hudMsg">El universo está en calma… da un click o toque para ir juntando las luces.</div>
+    <div class="bar-bg">
+      <div class="bar-fill" id="barFill"></div>
+    </div>
+    <div class="hud-sub" id="hudSub">0 / 5 toques para formar el corazón</div>
+    <button id="openNoteBtn" type="button">💌 Leer tu pista de esta noche</button>
+  </div>
+
+  <div id="noteModal">
+    <div class="note-box">
+      <div class="note-tag">🌌 Con algo de nervios · Esta Noche</div>
+      <div class="note-title">HOLIII, ESPERO TE GUSTE</div>
+      <p class="note-body">
+        “Se que a veces me pongo nervioso con solo verte, pero curiosamente eso me gusta porque me hace fijarme más en ti: en tus hermosos ojos, en cómo se ve tu cabello(melena) y la verdad que me gusta mucho. Sé que tu color favorito es el azul, y estuve pensando en alguien de ese tono… un pequeño, travieso y tierno, de orejas largas y alma inquieta, que además lleva ese aroma muy agradable jajaja. Pasaré en la noche por tu casa para darte una sorpresa espero no te duermas temprano … ojalá esto te saque una sonrisa.”
+      </p>
+      <button id="closeNoteBtn" type="button">💙</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const BUF_W = 1080;
+    const BUF_H = 920;
+    const buf = new Float32Array(BUF_W * BUF_H * 3);
+
+    const offscreen = document.createElement("canvas");
+    offscreen.width = BUF_W;
+    offscreen.height = BUF_H;
+    const offCtx = offscreen.getContext("2d");
+    const imgData = offCtx.createImageData(BUF_W, BUF_H);
+
+    const bloomDown = document.createElement("canvas");
+    bloomDown.width = Math.floor(BUF_W / 3);
+    bloomDown.height = Math.floor(BUF_H / 3);
+    const bloomDownCtx = bloomDown.getContext("2d");
+
+    const bloomMid = document.createElement("canvas");
+    bloomMid.width = Math.floor(BUF_W / 6);
+    bloomMid.height = Math.floor(BUF_H / 6);
+    const bloomMidCtx = bloomMid.getContext("2d");
+
+    const hudCard = document.getElementById("hudCard");
+    const hudMsg = document.getElementById("hudMsg");
+    const barFill = document.getElementById("barFill");
+    const hudSub = document.getElementById("hudSub");
+    const openNoteBtn = document.getElementById("openNoteBtn");
+    const noteModal = document.getElementById("noteModal");
+    const closeNoteBtn = document.getElementById("closeNoteBtn");
+    const musicPill = document.getElementById("musicPill");
+    const discIcon = document.getElementById("discIcon");
+
+    const TOTAL_CLICKS = 5;
+    const SHY_STEPS = [
+      "El universo está en calma… da un click o toque para ir juntando las luces.",
+      "1/5 · Perdón, con solo verte ya me pongo nervioso… pero te traje una adivinanza.",
+      "2/5 · Es que me fascinan tus ojos… y me encanta imaginar cómo resolverías esto.",
+      "3/5 · También me gusta cómo se ve tu cabello… y sé que tu color favorito es el azul.",
+      "4/5 · Un toque más… tiene orejas grandes, un lado travieso y ese aroma que tanto te gusta.",
+      "5/5 · Listo… pasaré en la noche por tu casa para darte una sorpresa 💙"
+    ];
+
+    let viewW = window.innerWidth;
+    let viewH = window.innerHeight;
+
+    function resizeView() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      viewW = window.innerWidth;
+      viewH = window.innerHeight;
+      canvas.width = Math.floor(viewW * dpr);
+      canvas.height = Math.floor(viewH * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    window.addEventListener("resize", resizeView);
+    resizeView();
+
+    // --- Melodía suave ---
+    const melodyEngine = (() => {
+      let audioCtx = null;
+      let masterGain = null;
+      let timerId = null;
+      let playing = false;
+      let muted = false;
+      let step = 0;
+
+      const notes = [
+        392.00, 493.88, 587.33, 659.25, 587.33, 493.88,
+        349.23, 440.00, 523.25, 659.25, 523.25, 440.00,
+        329.63, 392.00, 493.88, 587.33, 493.88, 392.00,
+        293.66, 440.00, 587.33, 659.25, 587.33, 440.00
+      ];
+
+      function playNote(freq, dur = 1.8, vol = 0.045) {
+        if (!audioCtx || muted || !playing) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const over = audioCtx.createOscillator();
+        const env = audioCtx.createGain();
+        const overGain = audioCtx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, now);
+
+        over.type = "triangle";
+        over.frequency.setValueAtTime(freq * 2, now);
+        overGain.gain.setValueAtTime(0.14, now);
+
+        env.gain.setValueAtTime(0.0001, now);
+        env.gain.linearRampToValueAtTime(vol, now + 0.09);
+        env.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+        osc.connect(env);
+        over.connect(overGain);
+        overGain.connect(env);
+        env.connect(masterGain);
+
+        osc.start(now);
+        over.start(now);
+        osc.stop(now + dur + 0.05);
+        over.stop(now + dur + 0.05);
+      }
+
+      function start() {
+        if (playing) return;
+        playing = true;
+        muted = false;
+        if (!audioCtx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          audioCtx = new AudioCtx();
+          masterGain = audioCtx.createGain();
+          masterGain.gain.setValueAtTime(0.8, audioCtx.currentTime);
+
+          const delay = audioCtx.createDelay(1.0);
+          delay.delayTime.setValueAtTime(0.35, audioCtx.currentTime);
+          const fb = audioCtx.createGain();
+          fb.gain.setValueAtTime(0.26, audioCtx.currentTime);
+          const wet = audioCtx.createGain();
+          wet.gain.setValueAtTime(0.28, audioCtx.currentTime);
+
+          masterGain.connect(audioCtx.destination);
+          masterGain.connect(delay);
+          delay.connect(fb);
+          fb.connect(delay);
+          delay.connect(wet);
+          wet.connect(audioCtx.destination);
+        }
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        playNote(notes[0], 2.0, 0.05);
+        step = 1;
+        timerId = setInterval(() => {
+          if (!playing || muted) return;
+          const f = notes[step % notes.length];
+          const acc = step % 6 === 0;
+          playNote(f, acc ? 2.3 : 1.6, acc ? 0.055 : 0.038);
+          step++;
+        }, 560);
+      }
+
+      function toggleMute() {
+        muted = !muted;
+        if (!muted) {
+          if (!playing) start();
+          else if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+        }
+        return !muted;
+      }
+
+      return { start, toggleMute };
+    })();
+
+    function clamp01(x) {
+      return x < 0 ? 0 : (x > 1 ? 1 : x);
+    }
+
+    function ease(a, b, x) {
+      const t = clamp01((x - a) / Math.max(1e-6, b - a));
+      return t * t * (3.0 - 2.0 * t);
+    }
+
+    function randRange(a, b) {
+      return a + Math.random() * (b - a);
+    }
+
+    function randNormal(mean = 0, std = 1) {
+      const u1 = Math.max(1e-7, Math.random());
+      const u2 = Math.random();
+      return mean + Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2) * std;
+    }
+
+    // =========================================================================
+    // 10,000 PARTÍCULAS: DE GALAXIA ESPIRAL INCLINADA (TIPO ANDRÓMEDA) A CORAZÓN AZUL 3D
+    // =========================================================================
+    const NP = 10000;
+    const p = {
+      gx: new Float32Array(NP),
+      gy: new Float32Array(NP),
+      gz: new Float32Array(NP),
+      hx: new Float32Array(NP),
+      hy: new Float32Array(NP),
+      hz: new Float32Array(NP),
+      x: new Float32Array(NP),
+      y: new Float32Array(NP),
+      z: new Float32Array(NP),
+      gr: new Float32Array(NP),
+      gg: new Float32Array(NP),
+      gb: new Float32Array(NP),
+      hr: new Float32Array(NP),
+      hg: new Float32Array(NP),
+      hb: new Float32Array(NP),
+      wBase: new Float32Array(NP),
+      phase: new Float32Array(NP)
+    };
+
+    function buildGalaxyToBlue3DHeart() {
+      // Inclinación diagonal similar a la galaxia de referencia (~38 grados)
+      const tilt = 0.66;
+      const cosT = Math.cos(tilt);
+      const sinT = Math.sin(tilt);
+      const planeSquash = 0.34; // Disco galáctico visto en perspectiva inclinada
+
+      for (let i = 0; i < NP; i++) {
+        // --- Estado inicial: Galaxia espiral luminosa con núcleo cálido y brazos azulados ---
+        const isCore = Math.random() < 0.24;
+        const isSatellite = !isCore && Math.random() < 0.045; // Pequeña galaxia satélite arriba a la derecha
+
+        let lx, ly, lz, cR, cG, cB;
+
+        if (isSatellite) {
+          const satR = Math.abs(randNormal(0, 0.14));
+          const satA = randRange(0, Math.PI * 2);
+          lx = 0.62 + Math.cos(satA) * satR * 1.2;
+          ly = 0.42 + Math.sin(satA) * satR * 0.7;
+          lz = randNormal(0, 0.08);
+          cR = 255;
+          cG = 246;
+          cB = 224;
+        } else if (isCore) {
+          // Bulbo central brillante (blanco-dorado-ámbar)
+          const rCore = Math.pow(Math.random(), 1.7) * 0.42;
+          const ang = randRange(0, Math.PI * 2);
+          lx = Math.cos(ang) * rCore;
+          ly = Math.sin(ang) * rCore * planeSquash;
+          lz = randNormal(0, 0.12 * (1 - rCore));
+          const coreHeat = Math.max(0, 1 - rCore / 0.42);
+          cR = 255;
+          cG = 215 + coreHeat * 40;
+          cB = 165 + coreHeat * 90;
+        } else {
+          // Brazos espirales inclinados con halo de estrellas azules y polvo cálido
+          const arm = i % 2 === 0 ? 0 : Math.PI;
+          const radius = Math.pow(Math.random(), 0.72) * 1.65;
+          const twist = radius * 2.35 + arm;
+          const spread = randNormal(0, 0.24 + radius * 0.14);
+          const angle = twist + spread;
+
+          const discX = Math.cos(angle) * radius;
+          const discY = Math.sin(angle) * radius * planeSquash + randNormal(0, 0.055 * (1 + radius * 0.3));
+          lz = randNormal(0, 0.16 * (1 - radius * 0.35));
+
+          lx = discX * cosT - discY * sinT;
+          ly = discX * sinT + discY * cosT;
+
+          const edgeRatio = Math.min(1, radius / 1.55);
+          const spark = Math.random();
+          if (spark < 0.52) {
+            // Brazos azul-celeste y violeta suave
+            cR = 120 + (1 - edgeRatio) * 85;
+            cG = 175 + (1 - edgeRatio) * 45;
+            cB = 255;
+          } else if (spark < 0.84) {
+            // Estrellas cálidas / crema en el disco
+            cR = 255;
+            cG = 212 + Math.random() * 35;
+            cB = 175 + Math.random() * 55;
+          } else {
+            // Destellos azul eléctrico / blanco estelar
+            cR = 185;
+            cG = 225;
+            cB = 255;
+          }
+        }
+
+        p.gx[i] = lx;
+        p.gy[i] = ly;
+        p.gz[i] = lz;
+        p.gr[i] = cR;
+        p.gg[i] = cG;
+        p.gb[i] = cB;
+
+        // --- Estado final: Corazón 3D volumétrico en tonos azules ---
+        const tH = randRange(0, Math.PI * 2);
+        const st = Math.sin(tH);
+        const ct = Math.cos(tH);
+        const rawX = 16 * Math.pow(st, 3);
+        const rawY = 13 * ct - 5 * Math.cos(2 * tH) - 2 * Math.cos(3 * tH) - Math.cos(4 * tH);
+
+        const isShell = Math.random() < 0.62;
+        const radial = isShell ? randRange(0.91, 1.03) : Math.cbrt(Math.random()) * 0.91;
+        const scaleH = 0.045 * radial;
+
+        const hx = rawX * scaleH;
+        const hy = rawY * scaleH + 0.08;
+
+        const lobeFactor = Math.max(0.18, Math.min(1.0, (hy + 0.65) / 1.15));
+        const crossSection = Math.sqrt(Math.max(0.01, 1.0 - Math.min(0.96, (hx * hx) / 0.52))) * lobeFactor;
+        const shellAngle = randRange(0, Math.PI * 2);
+        const depthR = isShell ? (0.86 + 0.14 * Math.random()) : Math.sqrt(Math.random());
+        const hz = Math.sin(shellAngle) * depthR * crossSection * 0.42;
+
+        p.hx[i] = hx;
+        p.hy[i] = hy;
+        p.hz[i] = hz;
+
+        p.x[i] = lx;
+        p.y[i] = ly;
+        p.z[i] = lz;
+
+        const shellBoost = isShell ? 1.2 : 0.85;
+        const depthShade = 0.72 + 0.38 * ((hz / 0.42) * 0.5 + 0.5);
+        const shade = shellBoost * depthShade;
+        const tone = Math.random();
+
+        if (tone < 0.45) {
+          p.hr[i] = 36 * shade;
+          p.hg[i] = (128 + Math.random() * 44) * shade;
+          p.hb[i] = 255 * shade;
+        } else if (tone < 0.82) {
+          p.hr[i] = 88 * shade;
+          p.hg[i] = (192 + Math.random() * 45) * shade;
+          p.hb[i] = 255 * shade;
+        } else {
+          p.hr[i] = 165 * shade;
+          p.hg[i] = 228 * shade;
+          p.hb[i] = 255 * shade;
+        }
+
+        p.wBase[i] = isShell ? randRange(0.95, 1.32) : randRange(0.6, 0.96);
+        p.phase[i] = randRange(0, Math.PI * 2);
+      }
+    }
+
+    buildGalaxyToBlue3DHeart();
+
+    // Campo estelar denso de fondo como en la imagen
+    const N_STARS = 420;
+    const starX = new Float32Array(N_STARS);
+    const starY = new Float32Array(N_STARS);
+    const starZ = new Float32Array(N_STARS);
+    const starB = new Float32Array(N_STARS);
+    const starTint = new Uint8Array(N_STARS);
+
+    for (let i = 0; i < N_STARS; i++) {
+      starX[i] = randRange(-3.4, 3.4);
+      starY[i] = randRange(-2.7, 2.7);
+      starZ[i] = randRange(-2.6, -0.4);
+      starB[i] = randRange(0.3, 1.0);
+      const rTint = Math.random();
+      starTint[i] = rTint < 0.25 ? 1 : (rTint < 0.42 ? 2 : 0); // 1: azul, 2: dorado, 0: blanco-azulado
+    }
+
+    function camProject(x, y, z, yaw, pitch, fov, centerY) {
+      const cy = Math.cos(yaw);
+      const sy = Math.sin(yaw);
+      const rx = x * cy + z * sy;
+      const rz1 = -x * sy + z * cy;
+
+      const cp = Math.cos(pitch);
+      const sp = Math.sin(pitch);
+      const ry = y * cp - rz1 * sp;
+      const rz = y * sp + rz1 * cp;
+
+      const depth = Math.max(0.35, 3.5 - rz);
+      const scale = fov / depth;
+      return {
+        u: BUF_W * 0.5 + rx * scale,
+        v: BUF_H * centerY - ry * scale,
+        depth
+      };
+    }
+
+    function splat(u, v, r, g, b, weight) {
+      const ix = Math.round(u);
+      const iy = Math.round(v);
+      if (ix < 1 || ix >= BUF_W - 1 || iy < 1 || iy >= BUF_H - 1) return;
+
+      const idx0 = (iy * BUF_W + ix) * 3;
+      buf[idx0] += r * weight;
+      buf[idx0 + 1] += g * weight;
+      buf[idx0 + 2] += b * weight;
+
+      const nw = weight * 0.22;
+      const nIdx = [idx0 - 3, idx0 + 3, idx0 - BUF_W * 3, idx0 + BUF_W * 3];
+      for (let k = 0; k < 4; k++) {
+        const ni = nIdx[k];
+        buf[ni] += r * nw;
+        buf[ni + 1] += g * nw;
+        buf[ni + 2] += b * nw;
+      }
+    }
+
+    let t = 0;
+    let clicksDone = 0;
+    let targetProgress = 0.0;
+    let smoothProgress = 0.0;
+    let noteShown = false;
+    let audioStarted = false;
+
+    function updateHud() {
+      const pct = Math.round(clamp01(targetProgress) * 100);
+      barFill.style.width = `${pct}%`;
+      hudMsg.textContent = SHY_STEPS[Math.min(SHY_STEPS.length - 1, clicksDone)];
+      hudSub.textContent = clicksDone < TOTAL_CLICKS
+        ? `${clicksDone} / ${TOTAL_CLICKS} clicks para formar el corazón`
+        : `${clicksDone} / ${TOTAL_CLICKS} · Corazón azul 3D formado 💙`;
+
+      if (clicksDone >= TOTAL_CLICKS) {
+        openNoteBtn.style.display = "inline-block";
+        if (!noteShown) {
+          noteShown = true;
+          setTimeout(() => noteModal.classList.add("open"), 520);
+        }
+      }
+    }
+
+    function onCanvasClick() {
+      if (!audioStarted) {
+        audioStarted = true;
+        melodyEngine.start();
+      }
+      if (clicksDone < TOTAL_CLICKS) {
+        clicksDone += 1;
+        targetProgress = clicksDone / TOTAL_CLICKS;
+        updateHud();
+      }
+    }
+
+    canvas.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      onCanvasClick();
+    });
+
+    openNoteBtn.addEventListener("click", () => noteModal.classList.add("open"));
+    closeNoteBtn.addEventListener("click", () => noteModal.classList.remove("open"));
+    noteModal.addEventListener("click", (e) => {
+      if (e.target === noteModal) noteModal.classList.remove("open");
+    });
+
+    musicPill.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const on = melodyEngine.toggleMute();
+      discIcon.classList.toggle("paused", !on);
+    });
+
+    let prevNow = performance.now();
+
+    function frame(now) {
+      const dt = Math.min(0.05, (now - prevNow) / 1000);
+      prevNow = now;
+      t += dt;
+
+      if (t >= 0.7) {
+        hudCard.classList.add("visible");
+      }
+
+      smoothProgress += (targetProgress - smoothProgress) * Math.min(1, dt * 3.2);
+      const g = ease(0.0, 1.0, smoothProgress);
+
+      buf.fill(0);
+
+      // Al inicio muestra la galaxia inclinada y al formar el corazón rota suavemente en 3D
+      const yaw = (Math.sin(t * 0.22) * 0.12 * (1 - g)) + (Math.sin(t * 0.45) * 0.42 * g);
+      const pitch = Math.sin(t * 0.32) * 0.08 * g;
+      const fov = 700;
+      const centerY = 0.52;
+
+      for (let i = 0; i < N_STARS; i++) {
+        const tw = 0.55 + 0.45 * Math.sin(t * 2.1 + i * 1.37);
+        const sp = camProject(starX[i], starY[i], starZ[i], yaw * 0.2, pitch * 0.2, fov, centerY);
+        const b = starB[i] * tw * (0.85 - 0.35 * g);
+        if (starTint[i] === 1) {
+          splat(sp.u, sp.v, b * 95, b * 185, b * 255, 0.52);
+        } else if (starTint[i] === 2) {
+          splat(sp.u, sp.v, b * 255, b * 195, b * 90, 0.5);
+        } else {
+          splat(sp.u, sp.v, b * 215, b * 225, b * 255, 0.46);
+        }
+      }
+
+      // Doble pulso suave tipo latido (lub-dub) del corazón azul 3D
+      const p1 = Math.pow(Math.max(0, Math.sin(t * 3.1)), 8);
+      const p2 = Math.pow(Math.max(0, Math.sin(t * 3.1 - 0.65)), 10) * 0.62;
+      const beat = 1.0 + (p1 + p2) * 0.065 * g;
+
+      // Rotación sutil de la galaxia antes de convertirse en corazón
+      const galSpin = t * 0.08 * (1.0 - g);
+      const cosS = Math.cos(galSpin);
+      const sinS = Math.sin(galSpin);
+
+      for (let i = 0; i < NP; i++) {
+        const gxRot = p.gx[i] * cosS - p.gy[i] * sinS;
+        const gyRot = p.gx[i] * sinS + p.gy[i] * cosS;
+        const gzRot = p.gz[i] + Math.sin(t * 0.7 + p.phase[i]) * 0.025 * (1.0 - g);
+
+        const tx = gxRot + (p.hx[i] * beat - gxRot) * g;
+        const ty = gyRot + (p.hy[i] * beat - gyRot) * g;
+        const tz = gzRot + (p.hz[i] * beat - gzRot) * g;
+
+        const lerpRate = Math.min(1, dt * 4.2);
+        p.x[i] += (tx - p.x[i]) * lerpRate;
+        p.y[i] += (ty - p.y[i]) * lerpRate;
+        p.z[i] += (tz - p.z[i]) * lerpRate;
+
+        const cr = p.gr[i] + (p.hr[i] - p.gr[i]) * g;
+        const cg = p.gg[i] + (p.hg[i] - p.gg[i]) * g;
+        const cb = p.gb[i] + (p.hb[i] - p.gb[i]) * g;
+
+        const pr = camProject(p.x[i], p.y[i], p.z[i], yaw, pitch, fov, centerY);
+        const pulseGlow = 1.0 + (p1 + p2) * 0.14 * g;
+        const galBoost = 1.15 - 0.15 * g;
+        const w = p.wBase[i] * galBoost * (0.72 + 0.32 * g) * pulseGlow * (2.5 / Math.max(0.6, pr.depth));
+        splat(pr.u, pr.v, cr, cg, cb, w);
+      }
+
+      const data = imgData.data;
+      for (let i = 0, pIdx = 0; i < BUF_W * BUF_H; i++, pIdx += 3) {
+        const r = buf[pIdx];
+        const gCol = buf[pIdx + 1];
+        const b = buf[pIdx + 2];
+
+        const rm = (r / (1.0 + r * 0.0038)) * 1.15;
+        const gm = (gCol / (1.0 + gCol * 0.0038)) * 1.15;
+        const bm = (b / (1.0 + b * 0.0038)) * 1.15;
+
+        const o = i * 4;
+        data[o] = rm > 255 ? 255 : rm;
+        data[o + 1] = gm > 255 ? 255 : gm;
+        data[o + 2] = bm > 255 ? 255 : bm;
+        data[o + 3] = 255;
+      }
+      offCtx.putImageData(imgData, 0, 0);
+
+      bloomDownCtx.clearRect(0, 0, bloomDown.width, bloomDown.height);
+      bloomDownCtx.drawImage(offscreen, 0, 0, bloomDown.width, bloomDown.height);
+
+      bloomMidCtx.clearRect(0, 0, bloomMid.width, bloomMid.height);
+      bloomMidCtx.drawImage(bloomDown, 0, 0, bloomMid.width, bloomMid.height);
+
+      ctx.fillStyle = "#03050e";
+      ctx.fillRect(0, 0, viewW, viewH);
+
+      const scaleCover = Math.max(viewW / BUF_W, viewH / BUF_H) * 0.96;
+      const drawW = BUF_W * scaleCover;
+      const drawH = BUF_H * scaleCover;
+      const drawX = (viewW - drawW) * 0.5;
+      const drawY = (viewH - drawH) * 0.5;
+
+      const fade = ease(0.0, 0.85, t);
+      ctx.save();
+      ctx.globalAlpha = fade;
+      ctx.drawImage(offscreen, drawX, drawY, drawW, drawH);
+
+      ctx.globalCompositeOperation = "lighter";
+      ctx.filter = "blur(8px)";
+      ctx.globalAlpha = 0.44 * fade;
+      ctx.drawImage(bloomDown, drawX, drawY, drawW, drawH);
+
+      ctx.filter = "blur(18px)";
+      ctx.globalAlpha = 0.28 * fade;
+      ctx.drawImage(bloomMid, drawX, drawY, drawW, drawH);
+      ctx.restore();
+
+      requestAnimationFrame(frame);
+    }
+
+    updateHud();
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>
